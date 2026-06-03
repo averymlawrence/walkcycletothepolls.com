@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Walk Cycle to the Polls — an animation project and civic celebration bridging walk cycles, civic history, and voter participation.">
+  <title>Walk Cycle to the Polls</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Open Graph -->
+  <meta property="og:title" content="Walk Cycle to the Polls">
+  <meta property="og:description" content="An animation project and civic celebration bridging walk cycles, civic history, and voter participation.">
+  <meta property="og:image" content="graphics/logo-walk-cycle-to-the-polls.png">
+  <meta property="og:url" content="https://www.walkcycletothepolls.com">
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <!-- Navigation -->
+  <nav aria-label="Main navigation">
+    <a href="index.html" class="nav-logo" aria-label="Walk Cycle to the Polls — home">
+      <img src="graphics/logo-walk-cycle-to-the-polls.png" alt="Walk Cycle to the Polls logo">
+      <span class="nav-logo-text">Walk Cycle<br>to the Polls</span>
+    </a>
+    <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">☰</button>
+    <ul class="nav-links" id="nav-links" role="list">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li>
+        <button class="nav-parent" aria-expanded="false" aria-haspopup="true">
+          Walking <span class="nav-arrow" aria-hidden="true">▾</span>
+        </button>
+        <ul class="dropdown" role="list">
+          <li><a href="walking/walk-cycles.html">Walk Cycles</a></li>
+          <li><a href="walking/history.html">History of Walking</a></li>
+          <li><a href="walking/make-a-walk-cycle.html">Make a Walk Cycle</a></li>
+        </ul>
+      </li>
+      <li><a href="voting.html">Voting</a></li>
+      <li>
+        <a class="nav-instagram" href="https://www.instagram.com/walkcycletothepolls" target="_blank" rel="noopener noreferrer" aria-label="Walk Cycle to the Polls on Instagram">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+          </svg>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="page-wrapper">
+    <main id="main-content">
+
+      <!-- Hero -->
+      <section class="hero" aria-label="Welcome">
+        <img
+          class="hero__logo"
+          src="graphics/logo-walk-cycle-to-the-polls.png"
+          alt="Walk Cycle to the Polls — logo showing a black postage-stamp design with white wavy lines on an orange background"
+        >
+        <p class="hero__tagline">An animation project. A civic celebration.</p>
+        <div class="btn-group" style="justify-content:center; position:relative; z-index:2;">
+          <a class="btn btn--black" href="about.html" style="background:var(--black);color:var(--white);">Learn About the Project</a>
+          <a class="btn btn--purple" href="walking/make-a-walk-cycle.html">Make Your Walk Cycle</a>
+        </div>
+
+        <!-- Walking character strip — replace src with actual GIF path when available -->
+        <!-- Character animation by Cal Fuqua, Winter 2024, Stamps School of Art & Design, U-M -->
+        <div class="hero__character-strip" aria-hidden="true">
+          <img
+            class="hero__character"
+            src="images/Fuqua-Cal-WALK.2-transparent.gif"
+            alt=""
+            role="presentation"
+          >
+        </div>
+
+        <!-- Wavy SVG background strip -->
+        <svg class="hero__waves" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,60 C180,20 360,100 540,60 C720,20 900,100 1080,60 C1260,20 1350,80 1440,60 L1440,120 L0,120 Z" fill="#111111" opacity="0.08"/>
+          <path d="M0,80 C180,40 360,120 540,80 C720,40 900,120 1080,80 C1260,40 1350,100 1440,80 L1440,120 L0,120 Z" fill="#111111" opacity="0.06"/>
+        </svg>
+      </section>
+
+      <!-- What is WCTTP -->
+      <section class="section" aria-labelledby="intro-heading">
+        <div class="container">
+          <span class="eyebrow">The Project</span>
+          <h2 id="intro-heading">Animation. History. Democracy.</h2>
+          <p class="lead">Walk Cycle to the Polls transforms the act of voting into a joyful, creative public event. Participants learn to animate their own 8-frame walk cycle characters, then race those characters to a virtual polling booth — before casting their real-world ballots.</p>
+          <div class="card-grid mt-24">
+            <div class="card">
+              <div class="card__label">Animate</div>
+              <h3>Create Your Character</h3>
+              <p>Learn the fundamentals of walk cycle animation from the tradition of Richard Williams and other masters. Draw 8 frames and bring your character to life.</p>
+            </div>
+            <div class="card">
+              <div class="card__label">Race</div>
+              <h3>Enter the Tournament</h3>
+              <p>Submit your character to the Walk Cycle to the Polls video game and race against other community members at early voting sites and public events.</p>
+            </div>
+            <div class="card">
+              <div class="card__label">Vote</div>
+              <h3>Cast Your Ballot</h3>
+              <p>After racing your avatar to the virtual polls, head to an early voting location and make your voice heard. Art and civic action, together.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2026 highlight -->
+      <section class="section section--black" aria-labelledby="2026-heading">
+        <div class="container">
+          <span class="eyebrow">Fall 2026 — The Semiquincentennial Update</span>
+          <h2 id="2026-heading" style="color:var(--white);">Bigger. Louder. More Accessible.</h2>
+          <p class="lead" style="color:rgba(255,255,255,0.8);">For the 2026 midterm elections, the project expands from a single classroom into a university-wide and community-facing initiative — with public workshops, a visit from legendary animator James Baxter, and tournaments at early voting sites across Ann Arbor.</p>
+          <div class="btn-group">
+            <a class="btn btn--orange" href="about.html">Read the Full Story</a>
+            <a class="btn btn--outline-white" href="walking/make-a-walk-cycle.html">Try the Walk Cycle Tool</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick links -->
+      <section class="section section--gray" aria-labelledby="explore-heading">
+        <div class="container text-center">
+          <span class="eyebrow">Explore</span>
+          <h2 id="explore-heading">What Would You Like to Do?</h2>
+          <div class="card-grid mt-24" style="text-align:left;">
+            <div class="card">
+              <div class="card__label">Learn</div>
+              <h3><a href="walking/walk-cycles.html">Walk Cycles</a></h3>
+              <p>Understand the 8 key positions of a walk cycle and the principles behind character animation.</p>
+            </div>
+            <div class="card">
+              <div class="card__label">History</div>
+              <h3><a href="walking/history.html">History of Walking</a></h3>
+              <p>From suffragette marches to Selma — the long history of walking as a civic and political act.</p>
+            </div>
+            <div class="card">
+              <div class="card__label">Create</div>
+              <h3><a href="walking/make-a-walk-cycle.html">Make a Walk Cycle</a></h3>
+              <p>Use our online tool to draw your own 8-frame walk cycle and submit it to the game.</p>
+            </div>
+            <div class="card">
+              <div class="card__label">Vote</div>
+              <h3><a href="voting.html">Register to Vote</a></h3>
+              <p>Find out how to register to vote, check your registration, and find your polling place.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-inner">
+        <div>
+          <div class="footer-logo">
+            <img src="graphics/logo-walk-cycle-to-the-polls.png" alt="Walk Cycle to the Polls">
+          </div>
+          <div class="footer-copy">
+            <p>An interdisciplinary civic art initiative at the<br>
+            <a href="https://stamps.umich.edu" target="_blank" rel="noopener noreferrer">Stamps School of Art &amp; Design</a>,
+            University of Michigan.</p>
+            <p class="mt-8">Project Lead: Avery Lawrence</p>
+          </div>
+        </div>
+        <div class="footer-social">
+          <a href="https://www.instagram.com/walkcycletothepolls" target="_blank" rel="noopener noreferrer" aria-label="Walk Cycle to the Polls on Instagram">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+            @walkcycletothepolls
+          </a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Walk Cycle to the Polls. University of Michigan Stamps School of Art &amp; Design.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="js/nav.js"></script>
+</body>
+</html>

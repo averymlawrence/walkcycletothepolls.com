@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Learn how walk cycles work — the 8 key positions, animation principles, and tips from Richard Williams and other masters.">
+  <title>Walk Cycles — Walk Cycle to the Polls</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .position-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 32px;
+    }
+    .position-card {
+      background: var(--black);
+      color: var(--white);
+      border-radius: 8px;
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .position-number {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--orange);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .position-name {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .position-desc {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.5;
+    }
+    .principle {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--gray-mid);
+    }
+    .principle:last-child { border-bottom: none; }
+    .principle__number {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      background: var(--orange);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <nav aria-label="Main navigation">
+    <a href="../index.html" class="nav-logo" aria-label="Walk Cycle to the Polls — home">
+      <img src="../graphics/logo-walk-cycle-to-the-polls.png" alt="Walk Cycle to the Polls logo">
+      <span class="nav-logo-text">Walk Cycle<br>to the Polls</span>
+    </a>
+    <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">☰</button>
+    <ul class="nav-links" id="nav-links" role="list">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="../about.html">About</a></li>
+      <li>
+        <button class="nav-parent" aria-expanded="false" aria-haspopup="true">
+          Walking <span class="nav-arrow" aria-hidden="true">▾</span>
+        </button>
+        <ul class="dropdown" role="list">
+          <li><a href="walk-cycles.html" class="active">Walk Cycles</a></li>
+          <li><a href="history.html">History of Walking</a></li>
+          <li><a href="make-a-walk-cycle.html">Make a Walk Cycle</a></li>
+        </ul>
+      </li>
+      <li><a href="../voting.html">Voting</a></li>
+      <li>
+        <a class="nav-instagram" href="https://www.instagram.com/walkcycletothepolls" target="_blank" rel="noopener noreferrer" aria-label="Walk Cycle to the Polls on Instagram">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="page-wrapper">
+    <main id="main-content">
+
+      <header class="page-hero">
+        <div class="container">
+          <span class="eyebrow">Walking</span>
+          <h1>Walk Cycles</h1>
+          <p class="lead">How to make a character walk — the art, the science, and the 8 key positions.</p>
+        </div>
+      </header>
+
+      <!-- What is a walk cycle -->
+      <section class="section" aria-labelledby="what-heading">
+        <div class="container prose">
+          <h2 id="what-heading">What Is a Walk Cycle?</h2>
+          <p class="lead">A walk cycle is a short sequence of animation frames — typically 8 to 12 drawings — that, when played on a loop, creates the illusion of a character walking forward. It is one of the most fundamental skills in animation, and one of the most expressive.</p>
+          <p>Every character walks differently. The way a character moves tells you everything about their personality, mood, and inner life — before they've said a single word. A confident stride. A tired shuffle. A nervous tip-toe. Walk cycles are character in motion.</p>
+          <p>The tradition of hand-drawn walk cycles goes back to the earliest days of animation. Studying and creating walk cycles is still a core exercise for animators at every level, from students just picking up a pencil to veterans with decades of professional credits.</p>
+        </div>
+      </section>
+
+      <!-- The 8 key positions -->
+      <section class="section section--gray" aria-labelledby="positions-heading">
+        <div class="container">
+          <span class="eyebrow">Richard Williams' Method</span>
+          <h2 id="positions-heading">The 8 Key Positions</h2>
+          <p>Richard Williams, author of <em>The Animator's Survival Kit</em> — arguably the most important animation reference book ever written — broke the walk cycle down into key positions that can be studied, practiced, and endlessly varied. Here are the 8 positions used in the Walk Cycle to the Polls project:</p>
+          <div class="position-grid">
+            <div class="position-card">
+              <div class="position-number">1</div>
+              <div class="position-name">Contact</div>
+              <div class="position-desc">The lead foot makes contact with the ground. Arms are in opposition — opposite arm forward. This is the highest body position.</div>
+            </div>
+            <div class="position-card">
+              <div class="position-number">2</div>
+              <div class="position-name">Recoil / Down</div>
+              <div class="position-desc">The body absorbs the impact of the contact. The body dips to its lowest point. The lead leg bends slightly.</div>
+            </div>
+            <div class="position-card">
+              <div class="position-number">3</div>
+              <div class="position-name">Passing</div>
+              <div class="position-desc">The free leg passes the supporting leg. The body is at a middle height. The passing foot lifts off the ground.</div>
+            </div>
+            <div class="position-card">
+              <div class="position-number">4</div>
+              <div class="position-name">High / Up</div>
+              <div class="position-desc">The body rises to its highest point as the supporting leg fully extends. The free leg swings forward.</div>
+            </div>
+            <div class="position-card">
+              <div class="position-number">5</div>
+              <div class="position-name">Contact (2nd)</div>
+              <div class="position-desc">The second contact position — a mirror of Position 1, with the opposite foot making contact and opposite arm forward.</div>
+            </div>
+            <div class="position-card">
+              <div class="position-number">6</div>
+              <div class="position-name">Recoil (2nd)</div>
+              <div class="position-desc">Mirror of Position 2. The body absorbs impact again on the other side.</div>
+            </div>
+            <div class="position-card">
+              <div class="position-number">7</div>
+              <div class="position-name">Passing (2nd)</div>
+              <div class="position-desc">Mirror of Position 3. The other foot passes through, creating the looping rhythm.</div>
+            </div>
+            <div class="position-card">
+              <div class="position-number">8</div>
+              <div class="position-name">High (2nd)</div>
+              <div class="position-desc">Mirror of Position 4. The cycle is complete — loop back to Position 1 and the walk continues.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Animation principles -->
+      <section class="section" aria-labelledby="principles-heading">
+        <div class="container">
+          <span class="eyebrow">Key Principles</span>
+          <h2 id="principles-heading">Making Your Walk Come Alive</h2>
+          <p>A technically correct walk cycle can still look stiff and lifeless. These principles — drawn from Richard Williams, Preston Blair, and the tradition of the Disney Nine Old Men — are what make the difference between a walk that's anatomically plausible and one that has real personality.</p>
+
+          <div style="margin-top:32px;">
+            <div class="principle">
+              <div class="principle__number" aria-hidden="true">1</div>
+              <div>
+                <h3>Squash &amp; Stretch</h3>
+                <p>The body naturally compresses on the down position and elongates on the up position. Exaggerating this — even slightly — gives your character weight and life. Think of the difference between a bowling ball and a rubber ball hitting the ground.</p>
+              </div>
+            </div>
+            <div class="principle">
+              <div class="principle__number" aria-hidden="true">2</div>
+              <div>
+                <h3>Anticipation</h3>
+                <p>Before a leg steps forward, there's a subtle preparation — a shift of weight, a coiling of energy. Even in a looping walk cycle, building in micro-anticipations makes movement feel motivated rather than mechanical.</p>
+              </div>
+            </div>
+            <div class="principle">
+              <div class="principle__number" aria-hidden="true">3</div>
+              <div>
+                <h3>Follow-Through &amp; Overlapping Action</h3>
+                <p>Not everything stops at the same time. Hair, clothing, a tail, a loose sleeve — these parts of a character continue to move briefly after the main body has settled into the next position. This overlap is what makes a character feel like they exist in the real world, subject to physics.</p>
+              </div>
+            </div>
+            <div class="principle">
+              <div class="principle__number" aria-hidden="true">4</div>
+              <div>
+                <h3>Secondary Action</h3>
+                <p>Walking isn't just legs. The arms swing in opposition to the legs. The hips rotate. The shoulders counter-rotate. The head may bob slightly. These secondary motions reinforce the primary action and add complexity to the character's physicality.</p>
+              </div>
+            </div>
+            <div class="principle">
+              <div class="principle__number" aria-hidden="true">5</div>
+              <div>
+                <h3>Timing &amp; Spacing</h3>
+                <p>How fast does your character walk? A slow, measured walk (more frames per step) reads very differently from a brisk march. The spacing between positions determines whether a character feels heavy or light, tired or energized, hesitant or purposeful.</p>
+              </div>
+            </div>
+            <div class="principle">
+              <div class="principle__number" aria-hidden="true">6</div>
+              <div>
+                <h3>Attitude &amp; Personality</h3>
+                <p>This is the most important principle — and the most fun. What does your character's walk say about who they are? A gangly, awkward walk. A powerful, confident stride. A creep on tip-toes. The same 8 positions, drawn with different choices, produce an infinite variety of characters.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Resources -->
+      <section class="section section--black" aria-labelledby="resources-heading">
+        <div class="container">
+          <span class="eyebrow">Go Deeper</span>
+          <h2 id="resources-heading" style="color:var(--white);">Recommended Resources</h2>
+          <div class="card-grid mt-24">
+            <div class="card">
+              <div class="card__label">Book</div>
+              <h3>The Animator's Survival Kit</h3>
+              <p>Richard Williams' essential guide to animation — the industry standard reference for walk cycles, runs, takes, and everything else. If you're serious about animation, this is the book.</p>
+            </div>
+            <div class="card">
+              <div class="card__label">Book</div>
+              <h3>Cartoon Animation</h3>
+              <p>Preston Blair's classic breakdown of cartoon character animation, including detailed walk cycle analysis with clear, accessible diagrams perfect for beginners.</p>
+            </div>
+            <div class="card">
+              <div class="card__label">Tool</div>
+              <h3>Make Your Own Walk Cycle</h3>
+              <p>Ready to try it yourself? Use our online walk cycle tool to draw your 8 frames and see your character come to life.</p>
+              <a class="btn btn--orange mt-16" href="make-a-walk-cycle.html" style="display:inline-block; margin-top:16px;">Open the Tool</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      <div class="footer-inner">
+        <div>
+          <div class="footer-logo">
+            <img src="../graphics/logo-walk-cycle-to-the-polls.png" alt="Walk Cycle to the Polls">
+          </div>
+          <div class="footer-copy">
+            <p>An interdisciplinary civic art initiative at the<br>
+            <a href="https://stamps.umich.edu" target="_blank" rel="noopener noreferrer">Stamps School of Art &amp; Design</a>,
+            University of Michigan.</p>
+            <p class="mt-8">Project Lead: Avery Lawrence</p>
+          </div>
+        </div>
+        <div class="footer-social">
+          <a href="https://www.instagram.com/walkcycletothepolls" target="_blank" rel="noopener noreferrer" aria-label="Walk Cycle to the Polls on Instagram">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            @walkcycletothepolls
+          </a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Walk Cycle to the Polls. University of Michigan Stamps School of Art &amp; Design.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="../js/nav.js"></script>
+</body>
+</html>

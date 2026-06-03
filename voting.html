@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Register to vote, check your registration, and find your polling place. Your vote matters.">
+  <title>Voting — Walk Cycle to the Polls</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .vote-step {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      padding: 32px 0;
+      border-bottom: 1px solid var(--gray-mid);
+    }
+    .vote-step:last-child { border-bottom: none; }
+    .vote-step__icon {
+      flex-shrink: 0;
+      width: 56px;
+      height: 56px;
+      background: var(--orange);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 900;
+    }
+    .vote-step__content h3 { margin-bottom: 8px; }
+    .vote-step__content p { color: var(--gray); margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <nav aria-label="Main navigation">
+    <a href="index.html" class="nav-logo" aria-label="Walk Cycle to the Polls — home">
+      <img src="graphics/logo-walk-cycle-to-the-polls.png" alt="Walk Cycle to the Polls logo">
+      <span class="nav-logo-text">Walk Cycle<br>to the Polls</span>
+    </a>
+    <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">☰</button>
+    <ul class="nav-links" id="nav-links" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li>
+        <button class="nav-parent" aria-expanded="false" aria-haspopup="true">
+          Walking <span class="nav-arrow" aria-hidden="true">▾</span>
+        </button>
+        <ul class="dropdown" role="list">
+          <li><a href="walking/walk-cycles.html">Walk Cycles</a></li>
+          <li><a href="walking/history.html">History of Walking</a></li>
+          <li><a href="walking/make-a-walk-cycle.html">Make a Walk Cycle</a></li>
+        </ul>
+      </li>
+      <li><a href="voting.html" class="active">Voting</a></li>
+      <li>
+        <a class="nav-instagram" href="https://www.instagram.com/walkcycletothepolls" target="_blank" rel="noopener noreferrer" aria-label="Walk Cycle to the Polls on Instagram">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="page-wrapper">
+    <main id="main-content">
+
+      <header class="page-hero">
+        <div class="container">
+          <span class="eyebrow">Civic Action</span>
+          <h1>Register to Vote</h1>
+          <p class="lead">You animated your character. Now animate your voice. Voting is the finish line.</p>
+        </div>
+      </header>
+
+      <!-- Big CTA -->
+      <section class="section" aria-labelledby="register-heading">
+        <div class="container">
+          <div class="vote-highlight">
+            <span class="eyebrow" style="color:var(--black); opacity:0.6;">Non-partisan voter information</span>
+            <h2 id="register-heading">Ready to Register?</h2>
+            <p>Vote.org is a nonpartisan resource that makes it easy to register, check your registration, and find your polling place — in every state.</p>
+            <a
+              class="btn btn--black"
+              href="https://www.vote.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="background:var(--black); color:var(--white); font-size:1.1rem; padding:16px 36px;"
+            >
+              Go to Vote.org &rarr;
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Steps -->
+      <section class="section section--gray" aria-labelledby="steps-heading">
+        <div class="container">
+          <span class="eyebrow">How It Works</span>
+          <h2 id="steps-heading">Three Steps to the Polls</h2>
+
+          <div style="margin-top:32px;">
+            <div class="vote-step">
+              <div class="vote-step__icon" aria-hidden="true">1</div>
+              <div class="vote-step__content">
+                <h3>Check Your Registration</h3>
+                <p>Already registered? Moved recently? Changed your name? Verify your registration is current before Election Day — deadlines vary by state.</p>
+                <a class="btn btn--orange" href="https://www.vote.org/am-i-registered-to-vote/" target="_blank" rel="noopener noreferrer">Check Registration at Vote.org</a>
+              </div>
+            </div>
+
+            <div class="vote-step">
+              <div class="vote-step__icon" aria-hidden="true">2</div>
+              <div class="vote-step__content">
+                <h3>Register to Vote</h3>
+                <p>Not registered? The process takes just a few minutes online in most states. In Michigan, you can register online up to 15 days before Election Day — or in person on Election Day itself.</p>
+                <a class="btn btn--orange" href="https://www.vote.org/register-to-vote/" target="_blank" rel="noopener noreferrer">Register at Vote.org</a>
+              </div>
+            </div>
+
+            <div class="vote-step">
+              <div class="vote-step__icon" aria-hidden="true">3</div>
+              <div class="vote-step__content">
+                <h3>Find Your Polling Place</h3>
+                <p>Know where to go on Election Day — or find an early voting location near you. Early voting is available at multiple locations, including the University of Michigan Museum of Art (UMMA) and North Campus sites.</p>
+                <a class="btn btn--orange" href="https://www.vote.org/polling-place-locator/" target="_blank" rel="noopener noreferrer">Find Your Polling Place</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Michigan specific info -->
+      <section class="section" aria-labelledby="michigan-heading">
+        <div class="container prose">
+          <span class="eyebrow">Michigan Voters</span>
+          <h2 id="michigan-heading">Voting in Michigan</h2>
+          <p>Michigan has some of the most accessible voting laws in the country. Here are the key things to know:</p>
+          <ul>
+            <li><strong>Same-Day Registration:</strong> You can register to vote at your polling place on Election Day in Michigan. Bring proof of residency.</li>
+            <li><strong>Early Voting:</strong> Michigan offers at least 9 days of early voting before each election. Check your local clerk's website for exact dates and locations.</li>
+            <li><strong>Absentee Voting:</strong> Any registered Michigan voter can request an absentee ballot — no excuse required.</li>
+            <li><strong>Student Voters:</strong> University of Michigan students can register and vote using their campus address.</li>
+          </ul>
+          <p class="mt-16">For the most current and detailed information about Michigan voting rules, visit the <a href="https://mvic.sos.state.mi.us/" target="_blank" rel="noopener noreferrer">Michigan Voter Information Center</a>.</p>
+        </div>
+      </section>
+
+      <!-- Why it matters -->
+      <section class="section section--black" aria-labelledby="why-heading">
+        <div class="container prose">
+          <span class="eyebrow">Why It Matters</span>
+          <h2 id="why-heading" style="color:var(--white);">People walked for this.</h2>
+          <p class="lead" style="color:rgba(255,255,255,0.85);">The right to vote wasn't given — it was marched for, fought for, and died for. By suffragettes who paraded down Fifth Avenue. By civil rights marchers who crossed the Edmund Pettus Bridge. By organizers who registered voters door by door.</p>
+          <p style="color:rgba(255,255,255,0.7);">Walk Cycle to the Polls exists because we believe voting should be joyful, accessible, and communal. Make your character walk. Then make your voice heard.</p>
+          <div class="btn-group">
+            <a class="btn btn--orange" href="https://www.vote.org" target="_blank" rel="noopener noreferrer">Register at Vote.org</a>
+            <a class="btn btn--outline-white" href="walking/history.html">Read the History of Walking</a>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      <div class="footer-inner">
+        <div>
+          <div class="footer-logo">
+            <img src="graphics/logo-walk-cycle-to-the-polls.png" alt="Walk Cycle to the Polls">
+          </div>
+          <div class="footer-copy">
+            <p>An interdisciplinary civic art initiative at the<br>
+            <a href="https://stamps.umich.edu" target="_blank" rel="noopener noreferrer">Stamps School of Art &amp; Design</a>,
+            University of Michigan.</p>
+            <p class="mt-8">Project Lead: Avery Lawrence</p>
+          </div>
+        </div>
+        <div class="footer-social">
+          <a href="https://www.instagram.com/walkcycletothepolls" target="_blank" rel="noopener noreferrer" aria-label="Walk Cycle to the Polls on Instagram">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            @walkcycletothepolls
+          </a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Walk Cycle to the Polls. University of Michigan Stamps School of Art &amp; Design.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="js/nav.js"></script>
+</body>
+</html>
