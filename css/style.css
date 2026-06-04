@@ -68,6 +68,11 @@ nav {
   display: flex;
   align-items: center;
   padding: 0 24px;
+  padding-left: max(24px, env(safe-area-inset-left));
+  padding-right: max(24px, env(safe-area-inset-right));
+  /* Push content below iPhone notch/Dynamic Island */
+  padding-top: env(safe-area-inset-top);
+  height: calc(var(--nav-height) + env(safe-area-inset-top));
   gap: 0;
 }
 
