@@ -59,16 +59,11 @@ a:focus-visible {
 .skip-link:focus { top: 0; }
 
 /* ── Navigation ───────────────────────────────────────────────────────── */
-/* Fixed so it always stays at top; padding-top fills the iPhone notch/Dynamic Island.
-   nav-inner holds the visible 64px content row below the safe area. */
 nav {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 100;
   background: var(--black);
-  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .nav-inner {
@@ -230,8 +225,7 @@ nav {
 
   .nav-links {
     position: fixed;
-    /* sit below the full nav (safe area + content row) */
-    top: calc(env(safe-area-inset-top, 0px) + var(--nav-height));
+    top: var(--nav-height);
     left: 0; right: 0;
     background: var(--black);
     flex-direction: column;
@@ -276,10 +270,8 @@ nav {
 }
 
 /* ── Page layout ──────────────────────────────────────────────────────── */
-/* Push content below the fixed nav (64px) + safe area (notch/Dynamic Island) */
 .page-wrapper {
-  padding-top: calc(var(--nav-height) + env(safe-area-inset-top, 0px));
-  min-height: 100vh;
+  min-height: calc(100vh - var(--nav-height));
   display: flex;
   flex-direction: column;
 }
