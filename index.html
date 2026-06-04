@@ -109,9 +109,13 @@
             var startPos = pos + gap;
             pos = startPos;
 
-            // Duration: 10–15s randomized so they don't all move in lockstep
-            var duration = (10 + Math.random() * 5).toFixed(1);
-            var delay = -(startPos / screenW) * parseFloat(duration); // negative delay so they're already mid-walk on load
+            // Duration scales with screen width so speed feels consistent across devices
+            // Base: ~160px/s on mobile, slower on wide screens
+            // Scale duration to screen width: wider screen = longer duration = same apparent speed
+            // Target ~80px/s on desktop, with ±20% randomization so they don't move in lockstep
+            var baseDuration = (screenW + 120) / 80;
+            var duration = (baseDuration * (0.8 + Math.random() * 0.4)).toFixed(1);
+            var delay = -(startPos / (screenW + 120)) * parseFloat(duration); // negative delay so they're already mid-walk on load
 
             img.style.animation = 'walk-across ' + duration + 's ' + delay + 's linear infinite';
             strip.appendChild(img);
