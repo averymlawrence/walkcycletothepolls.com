@@ -58,27 +58,18 @@ a:focus-visible {
 }
 .skip-link:focus { top: 0; }
 
-/* ── Safe-area cover (iPhone notch / Dynamic Island) ─────────────────── */
-/* A fixed black bar fills the status-bar area so the nav never hides behind it */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: env(safe-area-inset-top, 0px);
-  background: var(--black);
-  z-index: 200;
-  pointer-events: none;
-}
-
 /* ── Navigation ───────────────────────────────────────────────────────── */
+/* The nav element itself extends into the iPhone safe area (notch / Dynamic Island).
+   Its black background fills that space; the inner wrapper holds the 64px content row. */
 nav {
   position: sticky;
-  /* Stick just below the safe-area cover */
-  top: env(safe-area-inset-top, 0px);
+  top: 0;
   z-index: 100;
   background: var(--black);
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.nav-inner {
   height: var(--nav-height);
   display: flex;
   align-items: center;
@@ -228,7 +219,7 @@ nav {
 
 /* ── Mobile nav ───────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  nav {
+  .nav-inner {
     padding-left: 16px;
     padding-right: 16px;
   }
@@ -237,7 +228,7 @@ nav {
 
   .nav-links {
     position: fixed;
-    /* sit below safe-area cover + nav bar */
+    /* sit below the full nav (safe area + content row) */
     top: calc(env(safe-area-inset-top, 0px) + var(--nav-height));
     left: 0; right: 0;
     background: var(--black);
