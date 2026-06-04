@@ -58,21 +58,31 @@ a:focus-visible {
 }
 .skip-link:focus { top: 0; }
 
+/* ── Safe-area cover (iPhone notch / Dynamic Island) ─────────────────── */
+/* A fixed black bar fills the status-bar area so the nav never hides behind it */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  background: var(--black);
+  z-index: 200;
+  pointer-events: none;
+}
+
 /* ── Navigation ───────────────────────────────────────────────────────── */
 nav {
   position: sticky;
-  top: 0;
+  /* Stick just below the safe-area cover */
+  top: env(safe-area-inset-top, 0px);
   z-index: 100;
   background: var(--black);
   height: var(--nav-height);
   display: flex;
   align-items: center;
   padding: 0 24px;
-  padding-left: max(24px, env(safe-area-inset-left));
-  padding-right: max(24px, env(safe-area-inset-right));
-  /* Push content below iPhone notch/Dynamic Island */
-  padding-top: env(safe-area-inset-top);
-  height: calc(var(--nav-height) + env(safe-area-inset-top));
   gap: 0;
 }
 
@@ -221,14 +231,14 @@ nav {
   nav {
     padding-left: 16px;
     padding-right: 16px;
-    /* preserve padding-top: env(safe-area-inset-top) from base nav rule */
   }
 
   .nav-toggle { display: flex; }
 
   .nav-links {
     position: fixed;
-    top: calc(var(--nav-height) + env(safe-area-inset-top));
+    /* sit below safe-area cover + nav bar */
+    top: calc(env(safe-area-inset-top, 0px) + var(--nav-height));
     left: 0; right: 0;
     background: var(--black);
     flex-direction: column;

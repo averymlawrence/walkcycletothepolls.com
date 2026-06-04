@@ -12,7 +12,7 @@
   <!-- Open Graph -->
   <meta property="og:title" content="Walk Cycle to the Polls">
   <meta property="og:description" content="An animation project and civic celebration bridging walk cycles, civic history, and voter participation.">
-  <meta property="og:image" content="graphics/logo-walk-cycle-to-the-polls.png">
+  <meta property="og:image" content="graphics/WCTTP-logo-BWP.svg">
   <meta property="og:url" content="https://www.walkcycletothepolls.com">
 </head>
 <body>
@@ -22,7 +22,7 @@
   <!-- Navigation -->
   <nav aria-label="Main navigation">
     <a href="index.html" class="nav-logo" aria-label="Walk Cycle to the Polls — home">
-      <img src="graphics/logo-walk-cycle-to-the-polls.png" alt="Walk Cycle to the Polls logo">
+      <img src="graphics/WCTTP-logo-BWP.svg" alt="Walk Cycle to the Polls logo">
       <span class="nav-logo-text">Walk Cycle<br>to the Polls</span>
     </a>
     <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">☰</button>
@@ -57,7 +57,7 @@
       <section class="hero" aria-label="Welcome">
         <img
           class="hero__logo"
-          src="graphics/logo-walk-cycle-to-the-polls.png"
+          src="graphics/WCTTP-logo-BWP.svg"
           alt="Walk Cycle to the Polls — logo showing a black postage-stamp design with white wavy lines on an orange background"
         >
         <p class="hero__tagline">An animation project. A civic celebration.</p>
@@ -66,16 +66,57 @@
           <a class="btn btn--purple" href="walking/make-a-walk-cycle.html">Make Your Walk Cycle</a>
         </div>
 
-        <!-- Walking character strip — replace src with actual GIF path when available -->
-        <!-- Character animation by Cal Fuqua, Winter 2024, Stamps School of Art & Design, U-M -->
-        <div class="hero__character-strip" aria-hidden="true">
-          <img
-            class="hero__character"
-            src="images/Fuqua-Cal-WALK.2-transparent.gif"
-            alt=""
-            role="presentation"
-          >
-        </div>
+        <!-- Walking character parade — student walk cycles, Stamps School of Art & Design, U-M -->
+        <div class="hero__character-strip" aria-hidden="true" id="parade-strip"></div>
+
+        <script>
+          // All student walk cycle GIFs
+          var paradeGifs = [
+            'images/Fuqua-Cal-WALK.2-transparent.gif',
+            'images/Biebel-Grace-P.3-FINAL.gif',
+            'images/Gasser-Elisa-P.3-FINAL.gif',
+            'images/Glynn-Olivia-P.3-FINAL.gif',
+            'images/Hoppe-Jane-P.3-FINAL.gif',
+            'images/Moreno-Ivan-P.3-FINAL.gif',
+            'images/Muqit-Shafiq-P.3-FINAL.gif',
+            'images/Nguyen-Alex-P.3-FINAL.gif',
+            'images/Peng-Michelle-P.3-FINAL.gif',
+            'images/St.Cyr-Oliver-P.3-FINAL.gif',
+            'images/Weinberg-Veronica-P.3-FINAL.gif',
+            'images/White-Nala-P.3-FINAL.gif',
+            'images/Williamson-Sophia-P.3-FINAL.gif'
+          ];
+
+          // Shuffle so order varies on each load
+          paradeGifs.sort(function() { return Math.random() - 0.5; });
+
+          var strip = document.getElementById('parade-strip');
+          var screenW = window.innerWidth;
+          var pos = screenW; // start just off-screen right
+
+          paradeGifs.forEach(function(src, i) {
+            var img = document.createElement('img');
+            img.src = src;
+            img.alt = '';
+            img.role = 'presentation';
+            img.style.position = 'absolute';
+            img.style.bottom = '0';
+            img.style.height = '90px';
+            img.style.width = 'auto';
+
+            // Randomize gap between characters: 40–140px
+            var gap = 40 + Math.floor(Math.random() * 100);
+            var startPos = pos + gap;
+            pos = startPos;
+
+            // Duration: 10–15s randomized so they don't all move in lockstep
+            var duration = (10 + Math.random() * 5).toFixed(1);
+            var delay = -(startPos / screenW) * parseFloat(duration); // negative delay so they're already mid-walk on load
+
+            img.style.animation = 'walk-across ' + duration + 's ' + delay + 's linear infinite';
+            strip.appendChild(img);
+          });
+        </script>
 
       </section>
 
@@ -155,7 +196,7 @@
       <div class="footer-inner">
         <div>
           <div class="footer-logo">
-            <img src="graphics/logo-walk-cycle-to-the-polls.png" alt="Walk Cycle to the Polls">
+            <img src="graphics/WCTTP-logo-BWP.svg" alt="Walk Cycle to the Polls">
           </div>
           <div class="footer-copy">
             <p>An interdisciplinary civic art initiative at the<br>

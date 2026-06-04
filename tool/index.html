@@ -350,8 +350,8 @@ body {
 <script>
 // ─── Constants ────────────────────────────────────────────────────────────────
 const FRAME_COUNT = 8;
-const CANVAS_W    = 64;
-const CANVAS_H    = 64;
+const CANVAS_W    = 400;
+const CANVAS_H    = 400;
 
 // ─── Reference images (Richard Williams walk cycle poses) ─────────────────────
 const REF_FILENAMES = [
@@ -461,7 +461,7 @@ function resizeCanvasArea() {
   wrapper.style.width  = size + 'px';
   wrapper.style.height = size + 'px';
   if (autoZoom) {
-    zoom = Math.max(2, Math.min(16, Math.floor((size - 4) / CANVAS_W)));
+    zoom = Math.max(1, Math.min(2, Math.floor((size - 4) / CANVAS_W)));
     document.getElementById('zoomLabel').textContent       = zoom + '×';
     document.getElementById('zoomLabelMobile').textContent = zoom + '×';
     initCanvases();
@@ -806,15 +806,15 @@ function applyZoom(newZoom, disableAuto) {
     const cb=document.getElementById('chkAutoZoom');
     if(cb) cb.checked=false;
   }
-  zoom=Math.max(2,Math.min(16,newZoom));
+  zoom=Math.max(1,Math.min(2,newZoom));
   document.getElementById('zoomLabel').textContent=zoom+'×';
   document.getElementById('zoomLabelMobile').textContent=zoom+'×';
   initCanvases(); renderCurrentFrame(); renderRef();
 }
-document.getElementById('btnZoomIn'       ).addEventListener('click',()=>applyZoom(zoom+2,true));
-document.getElementById('btnZoomOut'      ).addEventListener('click',()=>applyZoom(zoom-2,true));
-document.getElementById('btnZoomInMobile' ).addEventListener('click',()=>applyZoom(zoom+2,true));
-document.getElementById('btnZoomOutMobile').addEventListener('click',()=>applyZoom(zoom-2,true));
+document.getElementById('btnZoomIn'       ).addEventListener('click',()=>applyZoom(zoom+1,true));
+document.getElementById('btnZoomOut'      ).addEventListener('click',()=>applyZoom(zoom-1,true));
+document.getElementById('btnZoomInMobile' ).addEventListener('click',()=>applyZoom(zoom+1,true));
+document.getElementById('btnZoomOutMobile').addEventListener('click',()=>applyZoom(zoom-1,true));
 document.getElementById('chkAutoZoom').addEventListener('change',e=>{
   autoZoom=e.target.checked;
   if(autoZoom) resizeCanvasArea();
@@ -845,8 +845,8 @@ window.addEventListener('keydown', e => {
   if (e.key==='p'||e.key==='P') setTool('pencil');
   if (e.key==='e'||e.key==='E') setTool('eraser');
   if (e.key==='f'||e.key==='F') setTool('fill');
-  if (e.key==='['  ) applyZoom(zoom-2,true);
-  if (e.key===']'  ) applyZoom(zoom+2,true);
+  if (e.key==='['  ) applyZoom(zoom-1,true);
+  if (e.key===']'  ) applyZoom(zoom+1,true);
   if (e.key==='ArrowRight') switchFrame((currentFrame+1)%FRAME_COUNT);
   if (e.key==='ArrowLeft' ) switchFrame((currentFrame-1+FRAME_COUNT)%FRAME_COUNT);
 });
