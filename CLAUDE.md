@@ -59,6 +59,11 @@ git push
 ```
 GitHub Pages auto-deploys ~1 minute after push. No build step needed — pure HTML/CSS/JS.
 
+## Fixes applied
+- **iPhone nav black bar** — added `viewport-fit=cover` to all pages + `env(safe-area-inset-top)` padding on nav; mobile media query updated to use longhand padding so it doesn't override safe area inset
+- **Homepage rolling hills** — removed wavy SVG background from hero section
+- **Walk cycle tool** — synced from Game folder twice; always copy from `/Users/averylawrence/Documents/Stamps/Intro to Animation/Walk Cycle to the Polls Game 2026 - Claude/index.html` to `tool/index.html`
+
 ## Things still to do / pending decisions
 - **Team/Collaborators section** on About page: removed for now, Avery needs to decide on attribution format before adding back. The full collaborator list is preserved in this file below.
 - **Homepage animation:** Cal Fuqua's GIF is live. More student walk cycle GIFs can be added to `images/` and wired into the homepage hero strip.
