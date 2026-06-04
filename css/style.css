@@ -225,7 +225,7 @@ nav {
 
   .nav-links {
     position: fixed;
-    top: var(--nav-height);
+    top: -100vh;
     left: 0; right: 0;
     background: var(--black);
     flex-direction: column;
@@ -233,13 +233,12 @@ nav {
     padding: 12px 0 24px;
     gap: 0;
     border-top: 1px solid rgba(255,255,255,0.1);
-    transform: translateY(-110%);
-    transition: transform 0.25s ease;
+    transition: top 0.25s ease;
     max-height: calc(100vh - var(--nav-height));
     overflow-y: auto;
   }
   .nav-links.open {
-    transform: translateY(0);
+    top: var(--nav-height);
   }
   .nav-links > li > a,
   .nav-links > li > button.nav-parent {
