@@ -218,13 +218,17 @@ nav {
 
 /* ── Mobile nav ───────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  nav { padding: 0 16px; }
+  nav {
+    padding-left: 16px;
+    padding-right: 16px;
+    /* preserve padding-top: env(safe-area-inset-top) from base nav rule */
+  }
 
   .nav-toggle { display: flex; }
 
   .nav-links {
     position: fixed;
-    top: var(--nav-height);
+    top: calc(var(--nav-height) + env(safe-area-inset-top));
     left: 0; right: 0;
     background: var(--black);
     flex-direction: column;
