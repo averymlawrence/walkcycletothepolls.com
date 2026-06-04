@@ -60,9 +60,10 @@ git push
 GitHub Pages auto-deploys ~1 minute after push. No build step needed — pure HTML/CSS/JS.
 
 ## Fixes applied
-- **iPhone nav black bar** — added `viewport-fit=cover` to all pages + `env(safe-area-inset-top)` padding on nav; mobile media query updated to use longhand padding so it doesn't override safe area inset
-- **Homepage rolling hills** — removed wavy SVG background from hero section
-- **Walk cycle tool** — synced from Game folder twice; always copy from `/Users/averylawrence/Documents/Stamps/Intro to Animation/Walk Cycle to the Polls Game 2026 - Claude/index.html` to `tool/index.html`
+- **Mobile nav black bar (RESOLVED)** — The root cause was `.nav-links` (position:fixed, hidden via `translateY(-110%)`) had its bottom edge sitting inside the nav bar, overlaying the logo and hamburger with a black background. Fixed by parking the closed menu at `top: -100vh` and animating to `top: var(--nav-height)` when opened. All `env(safe-area-inset-top)` and `viewport-fit=cover` approaches were red herrings — do NOT re-add them. The nav HTML uses a `<div class="nav-inner">` wrapper inside `<nav>` for layout; nav is `position: sticky; top: 0`.
+- **Google Form cookie prompt** — Replaced embedded iframe on both `index.html` and `about.html` with a plain link button pointing to the Google Form URL. Do not re-embed the form as an iframe.
+- **Homepage rolling hills** — Removed wavy SVG background from hero section.
+- **Walk cycle tool** — Synced from Game folder; always copy from `/Users/averylawrence/Documents/Stamps/Intro to Animation/Walk Cycle to the Polls Game 2026 - Claude/index.html` to `tool/index.html`.
 
 ## Things still to do / pending decisions
 - **Team/Collaborators section** on About page: removed for now, Avery needs to decide on attribution format before adding back. The full collaborator list is preserved in this file below.
