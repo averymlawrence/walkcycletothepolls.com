@@ -271,7 +271,7 @@ body {
   <input type="color" id="colorPicker" value="#F0A500" title="Color">
   <input type="number" id="brushSize" value="1" min="1" max="20" title="Brush size" class="desktop-only">
   <div class="sep desktop-only"></div>
-  <label class="slider-label desktop-only">Ref:<input type="range" id="refOpacity" min="0" max="100" value="30"></label>
+  <label class="slider-label desktop-only">Ref:<input type="range" id="refOpacity" min="0" max="100" value="60"></label>
   <button class="tool-btn desktop-only" id="btnToggleRef">Ref On</button>
   <div class="sep desktop-only"></div>
   <label class="slider-label desktop-only">Onion:<input type="range" id="onionOpacity" min="0" max="60" value="20"></label>
@@ -376,7 +376,7 @@ body {
     <h4>Reference guide</h4>
     <div class="panel-row">
       <span class="panel-label">Opacity:</span>
-      <input type="range" id="refOpacityMobile" min="0" max="100" value="30" style="flex:1;accent-color:var(--purple);">
+      <input type="range" id="refOpacityMobile" min="0" max="100" value="60" style="flex:1;accent-color:var(--purple);">
       <button class="tool-btn" id="btnToggleRefMobile" style="padding:4px 8px;">Ref On</button>
     </div>
   </div>
@@ -500,7 +500,7 @@ let brushSize       = 1;
 let zoom            = 1;
 let autoZoom        = true;
 let refVisible      = true;
-let refOpacityVal   = 0.30;
+let refOpacityVal   = 0.60;
 let onionOpacityVal = 0.20;
 let isDrawing       = false;
 let lastX = -1, lastY = -1;
@@ -540,19 +540,24 @@ function resizeCanvasArea() {
   wrapper.style.width  = size + 'px';
   wrapper.style.height = size + 'px';
   if (autoZoom) {
-    zoom = Math.max(1, Math.min(2, Math.floor((size - 4) / CANVAS_W)));
-    document.getElementById('zoomLabel').textContent       = zoom + '×';
-    document.getElementById('zoomLabelMobile').textContent = zoom + '×';
+    zoom = size / CANVAS_W;  // fill wrapper exactly — float zoom, no border
+    updateZoomLabel();
     initCanvases();
     renderCurrentFrame();
     renderRef();
   }
 }
 
+function updateZoomLabel() {
+  const lbl = zoom.toFixed(1) + '×';
+  document.getElementById('zoomLabel').textContent       = lbl;
+  document.getElementById('zoomLabelMobile').textContent = lbl;
+}
+
 function initCanvases() {
   [drawCanvas, refCanvas, onionCanvas, shapeCanvas].forEach(c => {
-    c.width  = CANVAS_W * zoom;
-    c.height = CANVAS_H * zoom;
+    c.width  = Math.round(CANVAS_W * zoom);
+    c.height = Math.round(CANVAS_H * zoom);
   });
   dc.imageSmoothingEnabled  = false;
   rc.imageSmoothingEnabled  = true;
@@ -608,24 +613,34 @@ function updateThumbs() {
 
 // ─── Reference images ─────────────────────────────────────────────────────────
 function processRefImage(img) {
+  // Process at the image's NATIVE resolution first — downscaling before
+  // processing would blur thin lines into near-white and make them disappear.
+  const W = img.naturalWidth  || img.width  || REF_CACHE_SIZE;
+  const H = img.naturalHeight || img.height || REF_CACHE_SIZE;
+
   const tmp = document.createElement('canvas');
-  tmp.width = REF_CACHE_SIZE; tmp.height = REF_CACHE_SIZE;
+  tmp.width = W; tmp.height = H;
   const tc = tmp.getContext('2d');
-  tc.fillStyle = '#fff';
-  tc.fillRect(0, 0, REF_CACHE_SIZE, REF_CACHE_SIZE);
-  tc.drawImage(img, 0, 0, REF_CACHE_SIZE, REF_CACHE_SIZE);
-  const d = tc.getImageData(0, 0, REF_CACHE_SIZE, REF_CACHE_SIZE);
+  tc.drawImage(img, 0, 0);
+  const d = tc.getImageData(0, 0, W, H);
+
   for (let i = 0; i < d.data.length; i += 4) {
     const lum = 0.299*d.data[i] + 0.587*d.data[i+1] + 0.114*d.data[i+2];
-    if (lum > 210) {
+    if (lum > 230) {
       d.data[i+3] = 0;
     } else {
-      d.data[i+3] = Math.round(Math.min(1, (210-lum)/150) * 255);
+      d.data[i+3] = Math.round(Math.min(1, (230-lum)/50) * 255);
     }
   }
+  tc.putImageData(d, 0, 0);
+
+  // Now scale the processed result down to the cache size
   const out = document.createElement('canvas');
   out.width = REF_CACHE_SIZE; out.height = REF_CACHE_SIZE;
-  out.getContext('2d').putImageData(d, 0, 0);
+  const oc = out.getContext('2d');
+  oc.imageSmoothingEnabled = true;
+  oc.imageSmoothingQuality = 'high';
+  oc.drawImage(tmp, 0, 0, REF_CACHE_SIZE, REF_CACHE_SIZE);
   return out;
 }
 
@@ -1099,15 +1114,14 @@ document.getElementById('onionOpacityMobile').addEventListener('input', e=>syncO
 // ─── Zoom ─────────────────────────────────────────────────────────────────────
 function applyZoom(newZoom, disableAuto) {
   if(disableAuto){ autoZoom=false; const cb=document.getElementById('chkAutoZoom'); if(cb) cb.checked=false; }
-  zoom=Math.max(1,Math.min(2,newZoom));
-  document.getElementById('zoomLabel').textContent=zoom+'×';
-  document.getElementById('zoomLabelMobile').textContent=zoom+'×';
+  zoom=Math.max(0.5, Math.min(4, newZoom));
+  updateZoomLabel();
   initCanvases(); renderCurrentFrame(); renderRef();
 }
-document.getElementById('btnZoomIn'       ).addEventListener('click',()=>applyZoom(zoom+1,true));
-document.getElementById('btnZoomOut'      ).addEventListener('click',()=>applyZoom(zoom-1,true));
-document.getElementById('btnZoomInMobile' ).addEventListener('click',()=>applyZoom(zoom+1,true));
-document.getElementById('btnZoomOutMobile').addEventListener('click',()=>applyZoom(zoom-1,true));
+document.getElementById('btnZoomIn'       ).addEventListener('click',()=>applyZoom(zoom+0.5,true));
+document.getElementById('btnZoomOut'      ).addEventListener('click',()=>applyZoom(zoom-0.5,true));
+document.getElementById('btnZoomInMobile' ).addEventListener('click',()=>applyZoom(zoom+0.5,true));
+document.getElementById('btnZoomOutMobile').addEventListener('click',()=>applyZoom(zoom-0.5,true));
 document.getElementById('chkAutoZoom').addEventListener('change',e=>{
   autoZoom=e.target.checked; if(autoZoom) resizeCanvasArea();
 });
@@ -1134,8 +1148,8 @@ window.addEventListener('keydown', e => {
   if (e.key==='e'||e.key==='E') setTool('eraser');
   if (e.key==='f'||e.key==='F') setTool('fill');
   if (e.key==='s'||e.key==='S') setTool('shape');
-  if (e.key==='[') applyZoom(zoom-1,true);
-  if (e.key===']') applyZoom(zoom+1,true);
+  if (e.key==='[') applyZoom(zoom-0.5,true);
+  if (e.key===']') applyZoom(zoom+0.5,true);
   if (e.key==='ArrowRight') switchFrame((currentFrame+1)%frameCount);
   if (e.key==='ArrowLeft' ) switchFrame((currentFrame-1+frameCount)%frameCount);
 });
