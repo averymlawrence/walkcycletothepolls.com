@@ -248,6 +248,10 @@ body {
       4-Frame Walk Cycle
       <span class="sub">Ping-pong cycle — frames 1 &amp; 3 are always the same</span>
     </button>
+    <button class="start-btn alt" id="btn1frame" style="border-color:#888;color:#aaa;">
+      1 Drawing
+      <span class="sub">One pose that bops back &amp; forth — lowest commitment!</span>
+    </button>
   </div>
 </div>
 
@@ -264,6 +268,7 @@ body {
   <button class="tool-btn"        id="btnEraser"  title="Eraser (E)">Eraser</button>
   <button class="tool-btn"        id="btnFill"    title="Fill (F)">Fill</button>
   <button class="tool-btn"        id="btnShape"   title="Shape (S)">Shape</button>
+  <button class="tool-btn"        id="btnSelect"  title="Select (V)">Select</button>
   <div class="sep"></div>
   <button class="tool-btn undo-redo" id="btnUndo" title="Undo (Ctrl/⌘+Z)" disabled>↩</button>
   <button class="tool-btn undo-redo" id="btnRedo" title="Redo (Ctrl/⌘+Shift+Z)" disabled>↪</button>
@@ -340,6 +345,21 @@ body {
         <input type="number" id="shapeStrokeWidth" value="2" min="1" max="20" class="stroke-width">
       </div>
     </div>
+
+    <!-- Selection options — shown only when select tool active -->
+    <div id="selSection" style="display:none;flex-direction:column;gap:6px;">
+      <div class="sdiv"></div>
+      <h3>Selection</h3>
+      <div class="shape-grid">
+        <button class="tool-btn active" id="btnSelRect">▭ Rect</button>
+        <button class="tool-btn"        id="btnSelLasso">⌇ Lasso</button>
+      </div>
+      <div style="font-size:9px;color:var(--muted);">Drag handles to scale</div>
+      <div style="font-size:9px;color:var(--muted);">Esc = commit &amp; deselect</div>
+      <button class="tool-btn" id="btnSelectAll"  style="margin-top:2px;">Select All</button>
+      <button class="tool-btn" id="btnDeselect"   style="margin-top:2px;" disabled>Deselect</button>
+      <span   id="selInfo" style="font-size:9px;color:var(--muted);margin-top:2px;">No selection</span>
+    </div>
   </div>
 </div>
 
@@ -413,6 +433,17 @@ body {
     </div>
   </div>
 
+  <!-- Selection options mobile — shown only when select tool active -->
+  <div class="panel-section" id="selSectionMobile" style="display:none">
+    <h4>Selection type</h4>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
+      <button class="tool-btn active" id="btnSelRect_m">▭ Rect</button>
+      <button class="tool-btn"        id="btnSelLasso_m">⌇ Lasso</button>
+    </div>
+    <button class="tool-btn" id="btnSelectAll_m"  style="width:100%;padding:8px;margin-bottom:6px;">Select All</button>
+    <button class="tool-btn" id="btnDeselect_m"   style="width:100%;padding:8px;" disabled>Deselect</button>
+  </div>
+
   <!-- Shape options mobile — shown only when shape tool active -->
   <div class="panel-section" id="shapeSectionMobile" style="display:none">
     <h4>Shape type</h4>
@@ -476,6 +507,11 @@ const REF_CONFIG = {
       '4-frame-reference-WALK-CYCLE_04.jpg',
     ],
   },
+  '1frame': {
+    frameCount: 1,
+    folder: '4-frame_walk-cycles',
+    files: ['4-frame-reference-WALK-CYCLE_01.jpg'], // passing pose as neutral standing ref
+  },
 };
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
@@ -487,7 +523,7 @@ const PALETTE = [
 ];
 
 // ─── Runtime state ────────────────────────────────────────────────────────────
-let appMode     = null;   // '8frame' | '4frame'
+let appMode     = null;   // '8frame' | '4frame' | '1frame'
 let frameCount  = 0;
 let frames      = [];
 let refCached   = [];
@@ -505,6 +541,24 @@ let onionOpacityVal = 0.20;
 let isDrawing       = false;
 let lastX = -1, lastY = -1;
 let playInterval    = null;
+
+// Bop animation (1-frame mode)
+let bopAnimId  = null;
+let bopStart   = 0;
+const BOP_AMPLITUDE = 12 * Math.PI / 180; // ±12°
+const BOP_PERIOD    = 560;                 // ms for one full tilt cycle
+
+// Selection tool state
+let selMode    = 'rect';   // 'rect' | 'lasso'
+let selPhase   = 'idle';   // 'idle' | 'defining' | 'floating' | 'moving' | 'scaling'
+let selBounds  = null;     // { x, y, w, h } in frame coords
+let selLassoPath = [];
+let selMask    = null;     // Uint8Array or null (null = full rect)
+let floatCanvas = null;
+let floatX = 0, floatY = 0, floatW = 0, floatH = 0;
+let selHandle  = -1;       // 0-3 corner handle being scaled
+let selAnchor  = null;     // { fx, fy } fixed corner during scale
+let selMovePrev = null;    // { fx, fy } last position during move
 
 // Shape state
 let shapeType        = 'circle';
@@ -777,6 +831,176 @@ function syncLinkedFrames(idx) {
   }
 }
 
+// ─── 1-frame bop animation ────────────────────────────────────────────────────
+function startBop() {
+  bopStart = performance.now();
+  document.getElementById('btnPlay').textContent = '⏹ Stop';
+  function tick(t) {
+    if (!bopAnimId) return;
+    const angle = Math.sin((t - bopStart) / BOP_PERIOD * Math.PI * 2) * BOP_AMPLITUDE;
+    const tmp = document.createElement('canvas');
+    tmp.width = CANVAS_W; tmp.height = CANVAS_H;
+    tmp.getContext('2d').putImageData(frames[0], 0, 0);
+    dc.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+    dc.save();
+    const pw = drawCanvas.width / 2, ph = drawCanvas.height; // bottom-center pivot
+    dc.translate(pw, ph);
+    dc.rotate(angle);
+    dc.translate(-pw, -ph);
+    dc.drawImage(tmp, 0, 0, drawCanvas.width, drawCanvas.height);
+    dc.restore();
+    bopAnimId = requestAnimationFrame(tick);
+  }
+  bopAnimId = requestAnimationFrame(tick);
+}
+
+function stopBop() {
+  if (bopAnimId) { cancelAnimationFrame(bopAnimId); bopAnimId = null; }
+  document.getElementById('btnPlay').textContent = '▶ Play';
+  renderCurrentFrame();
+}
+
+// ─── Selection tool ───────────────────────────────────────────────────────────
+function selHandlePositions() {
+  // Returns 4 corner positions in CANVAS coordinates (zoomed)
+  if (!selBounds && selPhase !== 'floating' && selPhase !== 'moving' && selPhase !== 'scaling') return [];
+  const x = floatX * zoom, y = floatY * zoom;
+  const w = floatW * zoom, h = floatH * zoom;
+  return [[x,y],[x+w,y],[x+w,y+h],[x,y+h]]; // TL, TR, BR, BL
+}
+
+function hitTestSelHandle(cx, cy) {
+  const HIT = 10; // px radius
+  return selHandlePositions().findIndex(([hx,hy]) =>
+    Math.abs(cx-hx) <= HIT && Math.abs(cy-hy) <= HIT
+  );
+}
+
+function hitTestSelInside(fx, fy) {
+  if (!floatCanvas) return false;
+  return fx >= floatX && fx < floatX+floatW && fy >= floatY && fy < floatY+floatH;
+}
+
+function defineSelection() {
+  const {x,y,w,h} = selBounds;
+  if (w <= 0 || h <= 0) return;
+  const fd = frames[currentFrame];
+
+  floatCanvas = document.createElement('canvas');
+  floatCanvas.width = w; floatCanvas.height = h;
+  const fc = floatCanvas.getContext('2d');
+  const id = fc.createImageData(w, h);
+
+  for (let sy=0; sy<h; sy++) {
+    for (let sx=0; sx<w; sx++) {
+      const inside = !selMask || selMask[sy*w+sx];
+      const fi = ((y+sy)*CANVAS_W+(x+sx))*4;
+      const ti = (sy*w+sx)*4;
+      if (inside && x+sx>=0 && x+sx<CANVAS_W && y+sy>=0 && y+sy<CANVAS_H) {
+        id.data[ti]   = fd.data[fi];
+        id.data[ti+1] = fd.data[fi+1];
+        id.data[ti+2] = fd.data[fi+2];
+        id.data[ti+3] = fd.data[fi+3];
+        fd.data[fi+3] = 0; // clear from frame
+      }
+    }
+  }
+  fc.putImageData(id, 0, 0);
+  floatX=x; floatY=y; floatW=w; floatH=h;
+}
+
+function commitSelection() {
+  if (!floatCanvas) { clearSelState(); return; }
+  // Paste floating canvas onto frame
+  const tmp = document.createElement('canvas');
+  tmp.width = CANVAS_W; tmp.height = CANVAS_H;
+  const tc = tmp.getContext('2d');
+  tc.putImageData(frames[currentFrame], 0, 0);
+  tc.imageSmoothingEnabled = false;
+  tc.drawImage(floatCanvas, floatX, floatY, floatW, floatH);
+  frames[currentFrame] = tc.getImageData(0, 0, CANVAS_W, CANVAS_H);
+  syncLinkedFrames(currentFrame);
+  clearSelState();
+  renderCurrentFrame(); updateThumbs();
+}
+
+function clearSelState() {
+  selPhase='idle'; selBounds=null; selMask=null; selLassoPath=[];
+  floatCanvas=null; floatX=0; floatY=0; floatW=0; floatH=0;
+  selHandle=-1; selAnchor=null; selMovePrev=null;
+  sc2.clearRect(0, 0, shapeCanvas.width, shapeCanvas.height);
+  updateSelUI();
+}
+
+function updateSelUI() {
+  const hasFloat = !!floatCanvas;
+  const info = hasFloat ? `${Math.round(floatW)} × ${Math.round(floatH)} px` : 'No selection';
+  const infoEl = document.getElementById('selInfo');
+  if (infoEl) infoEl.textContent = info;
+  ['btnDeselect','btnDeselect_m'].forEach(id => {
+    const b = document.getElementById(id); if (b) b.disabled = !hasFloat;
+  });
+}
+
+function drawSelOverlay() {
+  sc2.clearRect(0, 0, shapeCanvas.width, shapeCanvas.height);
+
+  if (selPhase === 'defining') {
+    sc2.save();
+    sc2.strokeStyle = '#444'; sc2.lineWidth = 1; sc2.setLineDash([5,4]);
+    if (selMode === 'rect') {
+      const x1=Math.min(selBounds.x,selBounds.x+selBounds.w)*zoom;
+      const y1=Math.min(selBounds.y,selBounds.y+selBounds.h)*zoom;
+      const x2=Math.max(selBounds.x,selBounds.x+selBounds.w)*zoom;
+      const y2=Math.max(selBounds.y,selBounds.y+selBounds.h)*zoom;
+      sc2.strokeRect(x1,y1,x2-x1,y2-y1);
+    } else if (selLassoPath.length > 1) {
+      sc2.beginPath();
+      selLassoPath.forEach(([px,py],i) => i===0 ? sc2.moveTo(px*zoom,py*zoom) : sc2.lineTo(px*zoom,py*zoom));
+      sc2.stroke();
+    }
+    sc2.restore();
+    return;
+  }
+
+  if (floatCanvas && (selPhase==='floating'||selPhase==='moving'||selPhase==='scaling')) {
+    // Draw floating content
+    sc2.imageSmoothingEnabled = false;
+    sc2.drawImage(floatCanvas, floatX*zoom, floatY*zoom, floatW*zoom, floatH*zoom);
+    // Border
+    sc2.save();
+    sc2.strokeStyle='#555'; sc2.lineWidth=1; sc2.setLineDash([5,4]);
+    sc2.strokeRect(floatX*zoom, floatY*zoom, floatW*zoom, floatH*zoom);
+    sc2.restore();
+    // Corner handles
+    sc2.setLineDash([]);
+    selHandlePositions().forEach(([hx,hy]) => {
+      sc2.fillStyle='#fff'; sc2.strokeStyle='#555'; sc2.lineWidth=1.5;
+      sc2.fillRect(hx-5,hy-5,10,10); sc2.strokeRect(hx-5,hy-5,10,10);
+    });
+    updateSelUI();
+  }
+}
+
+function buildLassoMask(path, bx, by, bw, bh) {
+  const mask = new Uint8Array(bw * bh);
+  for (let py=0; py<bh; py++) {
+    for (let px=0; px<bw; px++) {
+      const fx=bx+px+0.5, fy=by+py+0.5;
+      let crossings=0;
+      for (let i=0; i<path.length; i++) {
+        const [ax,ay]=path[i], [ex2,ey2]=path[(i+1)%path.length];
+        if ((ay>fy)!==(ey2>fy)) {
+          const t=(fy-ay)/(ey2-ay);
+          if (ax+t*(ex2-ax)>fx) crossings++;
+        }
+      }
+      mask[py*bw+px]=crossings%2;
+    }
+  }
+  return mask;
+}
+
 // ─── Drawing (pencil / eraser / fill) ────────────────────────────────────────
 function canvasXY(clientX, clientY) {
   const rect = drawCanvas.getBoundingClientRect();
@@ -843,6 +1067,42 @@ function floodFill(x,y) {
 
 function startDraw(clientX, clientY) {
   if (!appMode) return;
+  if (bopAnimId) stopBop(); // stop bop if user starts drawing
+
+  if (tool === 'select') {
+    const [fx,fy] = canvasXY(clientX, clientY);
+    const [cx,cy] = [clientX - drawCanvas.getBoundingClientRect().left,
+                     clientY - drawCanvas.getBoundingClientRect().top];
+    if (selPhase === 'floating' || selPhase === 'moving' || selPhase === 'scaling') {
+      const h = hitTestSelHandle(cx, cy);
+      if (h >= 0) {
+        // Start scaling from this corner; anchor = opposite corner in frame coords
+        const corners = [[floatX,floatY],[floatX+floatW,floatY],[floatX+floatW,floatY+floatH],[floatX,floatY+floatH]];
+        selHandle = h;
+        selAnchor = { fx: corners[(h+2)%4][0], fy: corners[(h+2)%4][1] };
+        selPhase = 'scaling';
+        isDrawing = true;
+        return;
+      }
+      if (hitTestSelInside(fx, fy)) {
+        selPhase = 'moving';
+        selMovePrev = { fx, fy };
+        isDrawing = true;
+        return;
+      }
+      // Click outside → commit, then start new selection
+      commitSelection();
+    }
+    // Start new selection
+    pushUndo();
+    isDrawing = true;
+    selPhase = 'defining';
+    selLassoPath = [[fx, fy]];
+    selBounds = { x:fx, y:fy, w:0, h:0 };
+    selMask = null;
+    return;
+  }
+
   pushUndo();
   isDrawing = true;
   const [x,y] = canvasXY(clientX, clientY);
@@ -866,6 +1126,36 @@ function startDraw(clientX, clientY) {
 
 function continueDraw(clientX, clientY) {
   if (!isDrawing) return;
+
+  if (tool === 'select') {
+    const [fx,fy] = canvasXY(clientX, clientY);
+    if (selPhase === 'defining') {
+      if (selMode === 'rect') {
+        selBounds.w = fx - selBounds.x;
+        selBounds.h = fy - selBounds.y;
+      } else {
+        selLassoPath.push([fx, fy]);
+      }
+      drawSelOverlay();
+      return;
+    }
+    if (selPhase === 'moving') {
+      floatX += fx - selMovePrev.fx;
+      floatY += fy - selMovePrev.fy;
+      selMovePrev = { fx, fy };
+      drawSelOverlay(); return;
+    }
+    if (selPhase === 'scaling' && selAnchor) {
+      // New bounds: anchor + current cursor define opposite corners
+      const nx = Math.min(selAnchor.fx, fx), ny = Math.min(selAnchor.fy, fy);
+      const nw = Math.max(1, Math.abs(fx - selAnchor.fx));
+      const nh = Math.max(1, Math.abs(fy - selAnchor.fy));
+      floatX=nx; floatY=ny; floatW=nw; floatH=nh;
+      drawSelOverlay(); return;
+    }
+    return;
+  }
+
   const [x,y] = canvasXY(clientX, clientY);
 
   if (tool === 'shape' && isShaping) {
@@ -883,6 +1173,46 @@ function continueDraw(clientX, clientY) {
 function stopDraw() {
   if (!isDrawing) return;
   isDrawing = false;
+
+  if (tool === 'select') {
+    if (selPhase === 'defining') {
+      if (selMode === 'rect') {
+        const x=Math.min(selBounds.x,selBounds.x+selBounds.w);
+        const y=Math.min(selBounds.y,selBounds.y+selBounds.h);
+        const w=Math.abs(selBounds.w), h=Math.abs(selBounds.h);
+        if (w>0 && h>0) {
+          selBounds={x,y,w,h};
+          defineSelection();
+          selPhase='floating';
+          drawSelOverlay();
+        } else { clearSelState(); }
+      } else {
+        // lasso: close path and compute bounding box
+        if (selLassoPath.length > 3) {
+          let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+          selLassoPath.forEach(([px,py])=>{
+            minX=Math.min(minX,px);minY=Math.min(minY,py);
+            maxX=Math.max(maxX,px);maxY=Math.max(maxY,py);
+          });
+          const bx=Math.max(0,Math.floor(minX)), by=Math.max(0,Math.floor(minY));
+          const bw=Math.min(CANVAS_W-bx,Math.ceil(maxX-minX)+1);
+          const bh=Math.min(CANVAS_H-by,Math.ceil(maxY-minY)+1);
+          if (bw>0 && bh>0) {
+            selBounds={x:bx,y:by,w:bw,h:bh};
+            selMask=buildLassoMask(selLassoPath,bx,by,bw,bh);
+            defineSelection();
+            selPhase='floating';
+            drawSelOverlay();
+          } else { clearSelState(); }
+        } else { clearSelState(); }
+      }
+    } else if (selPhase==='moving'||selPhase==='scaling') {
+      selPhase='floating';
+      drawSelOverlay();
+    }
+    return;
+  }
+
   if (tool === 'shape' && isShaping) {
     isShaping = false;
     clearShapeCanvas();
@@ -990,19 +1320,27 @@ function commitShape() {
 
 // ─── Tool buttons ─────────────────────────────────────────────────────────────
 function setTool(t) {
+  // Commit any active selection when switching tools
+  if (tool === 'select' && selPhase !== 'idle' && t !== 'select') commitSelection();
   tool = t;
-  ['pencil','eraser','fill','shape'].forEach(n =>
+  ['pencil','eraser','fill','shape','select'].forEach(n =>
     document.getElementById('btn'+n[0].toUpperCase()+n.slice(1)).classList.toggle('active', n===t)
   );
-  const show = t === 'shape';
-  document.getElementById('shapeSection').style.display       = show ? 'flex' : 'none';
-  document.getElementById('shapeSectionMobile').style.display = show ? ''     : 'none';
+  const isShape  = t === 'shape';
+  const isSel    = t === 'select';
+  document.getElementById('shapeSection').style.display       = isShape ? 'flex' : 'none';
+  document.getElementById('shapeSectionMobile').style.display = isShape ? ''     : 'none';
+  document.getElementById('selSection').style.display         = isSel   ? 'flex' : 'none';
+  document.getElementById('selSectionMobile').style.display   = isSel   ? ''     : 'none';
+  // Update cursor for selection tool
+  drawCanvas.style.cursor = isSel ? 'default' : 'crosshair';
 }
 
 document.getElementById('btnPencil').addEventListener('click', ()=>setTool('pencil'));
 document.getElementById('btnEraser').addEventListener('click', ()=>setTool('eraser'));
 document.getElementById('btnFill'  ).addEventListener('click', ()=>setTool('fill'));
 document.getElementById('btnShape' ).addEventListener('click', ()=>setTool('shape'));
+document.getElementById('btnSelect').addEventListener('click', ()=>setTool('select'));
 
 document.getElementById('colorPicker').addEventListener('input', e=>setColor(e.target.value));
 
@@ -1070,6 +1408,32 @@ document.getElementById('shapeStrokeWidth_m').addEventListener('input', e=>{
   shapeStrokeWidth=Math.max(1,parseInt(e.target.value)||1);
   document.getElementById('shapeStrokeWidth').value=shapeStrokeWidth;
 });
+
+// ─── Selection mode buttons ───────────────────────────────────────────────────
+function setSelMode(m) {
+  selMode = m;
+  ['rect','lasso'].forEach(s => {
+    document.getElementById('btnSel'+s[0].toUpperCase()+s.slice(1)).classList.toggle('active',s===m);
+    document.getElementById('btnSel'+s[0].toUpperCase()+s.slice(1)+'_m').classList.toggle('active',s===m);
+  });
+}
+['rect','lasso'].forEach(s => {
+  document.getElementById('btnSel'+s[0].toUpperCase()+s.slice(1)).addEventListener('click',()=>setSelMode(s));
+  document.getElementById('btnSel'+s[0].toUpperCase()+s.slice(1)+'_m').addEventListener('click',()=>setSelMode(s));
+});
+
+function doSelectAll() {
+  if (selPhase !== 'idle') commitSelection();
+  pushUndo();
+  selBounds = { x:0, y:0, w:CANVAS_W, h:CANVAS_H }; selMask = null;
+  defineSelection(); selPhase = 'floating'; drawSelOverlay();
+}
+function doDeselect() { commitSelection(); }
+
+['btnSelectAll','btnSelectAll_m'].forEach(id =>
+  document.getElementById(id).addEventListener('click', doSelectAll));
+['btnDeselect','btnDeselect_m'].forEach(id =>
+  document.getElementById(id).addEventListener('click', doDeselect));
 
 // ─── Ref & onion ──────────────────────────────────────────────────────────────
 function syncRefToggle() {
@@ -1143,11 +1507,13 @@ window.addEventListener('keydown', e => {
   const meta=e.metaKey||e.ctrlKey;
   if (meta&&!e.shiftKey&&(e.key==='z'||e.key==='Z')){ e.preventDefault(); undo(); return; }
   if ((meta&&e.shiftKey&&(e.key==='z'||e.key==='Z'))||(e.ctrlKey&&(e.key==='y'||e.key==='Y'))){ e.preventDefault(); redo(); return; }
+  if (e.key==='Escape') { if (tool==='select') commitSelection(); return; }
   if (e.target.tagName==='INPUT') return;
   if (e.key==='p'||e.key==='P') setTool('pencil');
   if (e.key==='e'||e.key==='E') setTool('eraser');
   if (e.key==='f'||e.key==='F') setTool('fill');
   if (e.key==='s'||e.key==='S') setTool('shape');
+  if (e.key==='v'||e.key==='V') setTool('select');
   if (e.key==='[') applyZoom(zoom-0.5,true);
   if (e.key===']') applyZoom(zoom+0.5,true);
   if (e.key==='ArrowRight') switchFrame((currentFrame+1)%frameCount);
@@ -1157,6 +1523,10 @@ window.addEventListener('keyup', e => { if (e.key==='Shift') shiftHeld=false; })
 
 // ─── Playback ─────────────────────────────────────────────────────────────────
 document.getElementById('btnPlay').addEventListener('click', ()=>{
+  if (appMode === '1frame') {
+    bopAnimId ? stopBop() : startBop();
+    return;
+  }
   if (playInterval) {
     clearInterval(playInterval); playInterval=null;
     document.getElementById('btnPlay').textContent='▶ Play';
@@ -1312,8 +1682,17 @@ function startProject(mode) {
   document.getElementById('startModal').style.display = 'none';
 
   const lbl = document.getElementById('modeLabel');
-  lbl.textContent = mode === '4frame' ? '4-frame' : '8-frame';
+  lbl.textContent = mode === '4frame' ? '4-frame' : mode === '1frame' ? '1-drawing' : '8-frame';
   lbl.style.display = '';
+
+  // Hide onion skin and copy-prev in 1-frame mode (not applicable)
+  const is1 = mode === '1frame';
+  ['btnCopyPrev','btnCopyPrevMobile'].forEach(id => {
+    const b=document.getElementById(id); if(b) b.style.display = is1 ? 'none' : '';
+  });
+  document.querySelector('label.slider-label.desktop-only[for]'); // just a ref check
+  const onionRow = document.getElementById('onionOpacity')?.closest('label');
+  if (onionRow) onionRow.style.display = is1 ? 'none' : '';
 
   buildPalette();
   buildTimeline();
@@ -1326,6 +1705,7 @@ function startProject(mode) {
 // ─── Startup modal ────────────────────────────────────────────────────────────
 document.getElementById('btn8frame').addEventListener('click', ()=>startProject('8frame'));
 document.getElementById('btn4frame').addEventListener('click', ()=>startProject('4frame'));
+document.getElementById('btn1frame').addEventListener('click', ()=>startProject('1frame'));
 
 // ─── ResizeObserver ───────────────────────────────────────────────────────────
 const resizeObs = new ResizeObserver(()=>{
