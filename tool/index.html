@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Walk Cycle Pixel Art Tool – Walk Cycle to the Polls</title>
+<title>Walk Cycle to the Polls</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* ── Brand color tokens ───────────────────────────────────────────────── */
+/* ── Brand tokens ─────────────────────────────────────────────────────────── */
 :root {
   --yellow:     #F0A500;
   --purple:     #A07CC5;
@@ -21,16 +21,38 @@
   --text:       #FFFFFF;
   --muted:      #888888;
 }
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 body {
   background: var(--bg); color: var(--text);
   font-family: 'Roboto', sans-serif;
   display: flex; flex-direction: column; height: 100dvh; overflow: hidden;
 }
 
-/* ── Toolbar ──────────────────────────────────────────────────────────── */
+/* ── Startup modal ────────────────────────────────────────────────────────── */
+#startModal {
+  position: fixed; inset: 0; z-index: 1000;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+}
+#startBox {
+  text-align: center; max-width: 420px; width: 90%;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  padding: 40px 30px;
+}
+#startBox h2 { font-size: 22px; font-weight: 700; color: var(--yellow); margin-bottom: 8px; }
+#startBox p  { font-size: 13px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
+.start-btn {
+  display: block; width: 100%; margin-bottom: 12px;
+  background: var(--bg); border: 2px solid var(--yellow); color: var(--yellow);
+  padding: 15px 20px; font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700;
+  border-radius: 8px; cursor: pointer; transition: background 0.15s, color 0.15s;
+}
+.start-btn:hover { background: var(--yellow); color: var(--bg); }
+.start-btn.alt   { border-color: var(--purple); color: var(--purple); }
+.start-btn.alt:hover { background: var(--purple); color: #fff; }
+.start-btn .sub  { display: block; font-size: 11px; font-weight: 400; margin-top: 3px; opacity: 0.8; }
+
+/* ── Toolbar ──────────────────────────────────────────────────────────────── */
 #toolbar {
   display: flex; align-items: center; gap: 6px;
   padding: 6px 10px; background: var(--panel);
@@ -43,7 +65,10 @@ body {
   font-size: 13px; font-weight: 700; color: var(--yellow);
   white-space: nowrap; flex-shrink: 0; letter-spacing: 0.3px;
 }
-
+#modeLabel {
+  font-size: 10px; color: var(--purple); white-space: nowrap; flex-shrink: 0;
+  border: 1px solid var(--purple-dim); border-radius: 3px; padding: 2px 5px;
+}
 .tool-btn {
   background: var(--bg); border: 1.5px solid var(--border-mid); color: var(--text);
   padding: 5px 10px; cursor: pointer; font-family: 'Roboto', sans-serif;
@@ -56,11 +81,8 @@ body {
 .tool-btn:active { background: #222; }
 .tool-btn.active { background: var(--purple); border-color: #C49BE0; color: #fff; }
 .tool-btn.active:hover { background: var(--purple-dim); }
-
-/* Undo/redo get slightly distinct look */
 .tool-btn.undo-redo { font-size: 14px; padding: 4px 9px; }
 .tool-btn.undo-redo:disabled { opacity: 0.3; cursor: default; }
-
 #colorPicker {
   width: 32px; height: 28px; border: 1.5px solid var(--border-mid); cursor: pointer;
   padding: 0; background: none; border-radius: 4px; flex-shrink: 0;
@@ -71,18 +93,15 @@ body {
   padding: 4px; border-radius: 4px; flex-shrink: 0; text-align: center;
 }
 .sep { width: 1px; background: var(--border); align-self: stretch; margin: 2px; flex-shrink: 0; }
-
 .slider-label {
   font-size: 11px; color: var(--muted); white-space: nowrap; flex-shrink: 0;
   display: flex; align-items: center; gap: 4px;
 }
 .slider-label input[type=range] { width: 70px; accent-color: var(--purple); cursor: pointer; }
-
 #status { font-size: 10px; color: var(--purple); padding: 2px 4px; white-space: nowrap; flex-shrink: 0; font-weight: 500; }
 
-/* ── Main ─────────────────────────────────────────────────────────────── */
+/* ── Main ─────────────────────────────────────────────────────────────────── */
 #main { display: flex; flex: 1; overflow: hidden; min-height: 0; }
-
 #canvasArea {
   flex: 1; min-width: 0; min-height: 0;
   display: flex; align-items: center; justify-content: center;
@@ -97,21 +116,16 @@ body {
   position: relative; display: inline-block;
   cursor: crosshair; touch-action: none;
 }
-/* ref canvas: smooth for the scanned drawings */
-#refCanvas   { position: absolute; top: 0; left: 0; pointer-events: none;
-               image-rendering: auto; }
-#onionCanvas { position: absolute; top: 0; left: 0; pointer-events: none;
-               z-index: 0; image-rendering: pixelated; }
-#drawCanvas  { position: relative; z-index: 1; image-rendering: pixelated; display: block; }
-
-/* Loading indicator for ref images */
+#refCanvas    { position: absolute; top: 0; left: 0; pointer-events: none; image-rendering: auto; }
+#onionCanvas  { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 0; image-rendering: pixelated; }
+#drawCanvas   { position: relative; z-index: 1; image-rendering: pixelated; display: block; }
+#shapeCanvas  { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 2; }
 #refLoading {
   position: absolute; bottom: 6px; right: 8px; z-index: 10;
   font-size: 10px; color: var(--muted); pointer-events: none;
-  font-family: 'Roboto', sans-serif;
 }
 
-/* ── Sidebar ──────────────────────────────────────────────────────────── */
+/* ── Sidebar ──────────────────────────────────────────────────────────────── */
 #sidebar {
   width: 150px; background: var(--panel); border-left: 2px solid var(--border);
   display: flex; flex-direction: column; padding: 8px; gap: 8px;
@@ -126,20 +140,35 @@ body {
 }
 .swatch:hover, .swatch:active { border-color: rgba(255,255,255,0.7); }
 .swatch.selected { border-color: var(--yellow); border-width: 2px; }
+.sdiv { width: 100%; height: 1px; background: var(--border); margin: 2px 0; }
 
-/* ── Bottom panel ─────────────────────────────────────────────────────── */
+/* Shape section in sidebar */
+#shapeSection { display: none; flex-direction: column; gap: 6px; }
+.shape-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.shape-row  { display: flex; align-items: center; gap: 6px; }
+.shape-lbl  { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.stroke-picker {
+  width: 30px; height: 22px; border: 1.5px solid var(--border-mid); cursor: pointer;
+  padding: 0; background: none; border-radius: 3px; flex-shrink: 0;
+}
+.stroke-width {
+  width: 46px; font-family: 'Roboto', sans-serif; font-size: 12px;
+  background: var(--bg); border: 1.5px solid var(--border-mid); color: var(--text);
+  padding: 3px; border-radius: 4px; text-align: center;
+}
+.check-row {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--muted);
+}
+
+/* ── Bottom panel ─────────────────────────────────────────────────────────── */
 #bottomPanel {
   background: var(--panel); border-top: 2px solid var(--border);
   padding: 5px 10px; display: flex; flex-direction: column; gap: 4px;
   flex-shrink: 0;
 }
-#timeline {
-  display: flex; align-items: center; gap: 5px;
-  overflow-x: auto; padding-bottom: 2px;
-  -webkit-overflow-scrolling: touch; scrollbar-width: thin;
-}
+#timeline { display: flex; align-items: center; gap: 5px; overflow-x: auto; padding-bottom: 2px; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
 #bottomControls { display: flex; align-items: center; gap: 7px; min-height: 30px; }
-
 .frame-thumb {
   position: relative; cursor: pointer; border: 2px solid var(--border);
   border-radius: 3px; background: var(--canvas-bg); flex-shrink: 0;
@@ -147,11 +176,10 @@ body {
 }
 .frame-thumb canvas { display: block; image-rendering: pixelated; }
 .frame-thumb.active { border-color: var(--yellow); }
-.frame-num { position: absolute; bottom: 2px; left: 3px; font-size: 9px; color: var(--muted); pointer-events: none; }
-
+.frame-num  { position: absolute; bottom: 2px; left: 3px; font-size: 9px; color: var(--muted); pointer-events: none; }
+.frame-link { position: absolute; top: 2px; right: 3px; font-size: 8px; color: var(--purple); pointer-events: none; font-weight: 700; }
 #playbackControls { display: flex; align-items: center; gap: 7px; }
 #exportControls   { display: flex; gap: 7px; margin-left: auto; }
-
 .export-btn {
   background: var(--bg); border: 1.5px solid var(--yellow); color: var(--yellow);
   padding: 5px 10px; cursor: pointer; font-family: 'Roboto', sans-serif;
@@ -160,7 +188,6 @@ body {
   transition: background 0.12s, color 0.12s;
 }
 .export-btn:hover, .export-btn:active { background: var(--yellow); color: var(--bg); }
-
 #fpsLabel { font-size: 11px; color: var(--muted); }
 #fpsInput {
   width: 40px; font-family: 'Roboto', sans-serif; font-size: 12px;
@@ -168,13 +195,12 @@ body {
   padding: 3px; border-radius: 4px; text-align: center;
 }
 
-/* ── Mobile slide-up panel ────────────────────────────────────────────── */
+/* ── Mobile slide-up panel ────────────────────────────────────────────────── */
 #paletteOverlay {
   display: none; position: fixed; inset: 0; z-index: 199;
   background: rgba(0,0,0,0.6); backdrop-filter: blur(2px);
 }
 #paletteOverlay.open { display: block; }
-
 #palettePanel {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
   background: var(--panel); border-top: 2px solid var(--border);
@@ -185,56 +211,65 @@ body {
   display: flex; flex-direction: column; gap: 12px;
 }
 #palettePanel.open { transform: translateY(0); }
-
-.panel-section h4 {
-  font-size: 10px; color: var(--muted); text-transform: uppercase;
-  letter-spacing: 1px; margin-bottom: 6px; font-weight: 500;
-}
+.panel-section h4 { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; font-weight: 500; }
 #mobilePalette { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; }
-#mobilePalette .swatch {
-  aspect-ratio: 1; border: 1.5px solid rgba(255,255,255,0.15);
-  cursor: pointer; border-radius: 3px; touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-.panel-row { display: flex; align-items: center; gap: 10px; }
+#mobilePalette .swatch { aspect-ratio: 1; border: 1.5px solid rgba(255,255,255,0.15); cursor: pointer; border-radius: 3px; touch-action: manipulation; }
+.panel-row   { display: flex; align-items: center; gap: 10px; }
 .panel-label { font-size: 11px; color: var(--muted); white-space: nowrap; min-width: 80px; }
 
-/* ── Responsive ───────────────────────────────────────────────────────── */
-@media (max-width: 1023px) {
-  #sidebar { width: 130px; }
-  .slider-label input[type=range] { width: 55px; }
-}
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 1023px) { #sidebar { width: 130px; } .slider-label input[type=range] { width: 55px; } }
 @media (max-width: 767px) {
-  #sidebar      { display: none; }
+  #sidebar { display: none; }
   .desktop-only { display: none !important; }
   .mobile-only  { display: inline-flex !important; }
-  #toolbar h1   { font-size: 11px; }
-  #toolbar      { gap: 5px; padding: 5px 8px; }
-  .tool-btn     { padding: 6px 9px; font-size: 12px; }
-  #bottomPanel  { padding: 4px 8px; }
-  .export-btn   { padding: 5px 8px; font-size: 11px; }
-  #fpsInput     { width: 36px; }
+  #toolbar h1 { font-size: 11px; }
+  #toolbar    { gap: 5px; padding: 5px 8px; }
+  .tool-btn   { padding: 6px 9px; font-size: 12px; }
+  #bottomPanel { padding: 4px 8px; }
+  .export-btn  { padding: 5px 8px; font-size: 11px; }
+  #fpsInput    { width: 36px; }
 }
 @media (max-width: 420px) { #toolbar h1 { display: none; } }
 </style>
 </head>
 <body>
 
+<!-- ── Startup modal ──────────────────────────────────────────────────────── -->
+<div id="startModal">
+  <div id="startBox">
+    <h2>Walk Cycle to the Polls</h2>
+    <p>Choose your walk cycle format to get started.</p>
+    <button class="start-btn" id="btn8frame">
+      8-Frame Walk Cycle
+      <span class="sub">Full cycle — 8 unique poses (Richard Williams)</span>
+    </button>
+    <button class="start-btn alt" id="btn4frame">
+      4-Frame Walk Cycle
+      <span class="sub">Ping-pong cycle — frames 1 &amp; 3 are always the same</span>
+    </button>
+  </div>
+</div>
+
+<!-- ── Toolbar ────────────────────────────────────────────────────────────── -->
 <div id="toolbar">
   <h1>Walk Cycle to the Polls</h1>
+  <span id="modeLabel" style="display:none"></span>
+
   <!-- Mobile-only tools toggle — first so always visible on phone -->
   <button class="tool-btn mobile-only" id="btnPaletteToggle"
     style="display:none;border-color:var(--yellow);color:var(--yellow);">&#9776; Tools</button>
 
-  <button class="tool-btn active" id="btnPencil" title="Pencil (P)">Pencil</button>
-  <button class="tool-btn" id="btnEraser" title="Eraser (E)">Eraser</button>
-  <button class="tool-btn" id="btnFill"   title="Fill (F)">Fill</button>
+  <button class="tool-btn active" id="btnPencil"  title="Pencil (P)">Pencil</button>
+  <button class="tool-btn"        id="btnEraser"  title="Eraser (E)">Eraser</button>
+  <button class="tool-btn"        id="btnFill"    title="Fill (F)">Fill</button>
+  <button class="tool-btn"        id="btnShape"   title="Shape (S)">Shape</button>
   <div class="sep"></div>
   <button class="tool-btn undo-redo" id="btnUndo" title="Undo (Ctrl/⌘+Z)" disabled>↩</button>
   <button class="tool-btn undo-redo" id="btnRedo" title="Redo (Ctrl/⌘+Shift+Z)" disabled>↪</button>
   <div class="sep"></div>
   <input type="color" id="colorPicker" value="#F0A500" title="Color">
-  <input type="number" id="brushSize" value="1" min="1" max="8" title="Brush size" class="desktop-only">
+  <input type="number" id="brushSize" value="1" min="1" max="20" title="Brush size" class="desktop-only">
   <div class="sep desktop-only"></div>
   <label class="slider-label desktop-only">Ref:<input type="range" id="refOpacity" min="0" max="100" value="30"></label>
   <button class="tool-btn desktop-only" id="btnToggleRef">Ref On</button>
@@ -244,6 +279,7 @@ body {
   <span id="status"></span>
 </div>
 
+<!-- ── Main ───────────────────────────────────────────────────────────────── -->
 <div id="main">
   <div id="canvasArea">
     <div id="canvasWrapper">
@@ -251,32 +287,63 @@ body {
         <canvas id="refCanvas"></canvas>
         <canvas id="onionCanvas"></canvas>
         <canvas id="drawCanvas"></canvas>
+        <canvas id="shapeCanvas"></canvas>
       </div>
       <span id="refLoading"></span>
     </div>
   </div>
 
-  <!-- Desktop / tablet sidebar -->
+  <!-- Desktop sidebar -->
   <div id="sidebar">
     <h3>Palette</h3>
     <div id="palette"></div>
-    <div style="width:100%;height:1px;background:var(--border);margin:4px 0;"></div>
+    <div class="sdiv"></div>
+
     <h3>Zoom</h3>
     <div style="display:flex;gap:4px;align-items:center;">
       <button class="tool-btn" id="btnZoomOut" style="padding:4px 8px;">−</button>
-      <span id="zoomLabel" style="font-size:11px;color:var(--muted);flex:1;text-align:center;">8×</span>
+      <span id="zoomLabel" style="font-size:11px;color:var(--muted);flex:1;text-align:center;">1×</span>
       <button class="tool-btn" id="btnZoomIn" style="padding:4px 8px;">+</button>
     </div>
     <label style="font-size:10px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:4px;">
       <input type="checkbox" id="chkAutoZoom" checked> Auto-zoom
     </label>
-    <div style="width:100%;height:1px;background:var(--border);margin:2px 0;"></div>
-    <button class="tool-btn" style="margin-top:2px;" id="btnCopyPrev">Copy Prev Frame</button>
-    <button class="tool-btn" style="margin-top:2px;" id="btnUndo2" disabled>↩ Undo</button>
-    <button class="tool-btn" style="margin-top:2px;" id="btnRedo2" disabled>↪ Redo</button>
+    <div class="sdiv"></div>
+
+    <button class="tool-btn" id="btnCopyPrev">Copy Prev Frame</button>
+    <button class="tool-btn" id="btnUndo2" disabled>↩ Undo</button>
+    <button class="tool-btn" id="btnRedo2" disabled>↪ Redo</button>
+
+    <!-- Shape options — shown only when shape tool is active -->
+    <div id="shapeSection" style="display:none;flex-direction:column;gap:6px;">
+      <div class="sdiv"></div>
+      <h3>Shape</h3>
+      <div class="shape-grid">
+        <button class="tool-btn active" id="btnSh_circle">● Circle</button>
+        <button class="tool-btn"        id="btnSh_square">■ Rect</button>
+        <button class="tool-btn"        id="btnSh_triangle">▲ Tri</button>
+        <button class="tool-btn"        id="btnSh_penta">⬠ Penta</button>
+      </div>
+      <div style="font-size:9px;color:var(--muted);">Shift+drag = proportional</div>
+      <div class="sdiv"></div>
+      <h3>Fill</h3>
+      <label class="check-row"><input type="checkbox" id="chkShapeFill" checked> Filled (palette color)</label>
+      <div class="sdiv"></div>
+      <h3>Stroke</h3>
+      <label class="check-row"><input type="checkbox" id="chkShapeStroke"> Add stroke</label>
+      <div class="shape-row">
+        <span class="shape-lbl">Color:</span>
+        <input type="color" id="shapeStrokePicker" value="#000000" class="stroke-picker">
+      </div>
+      <div class="shape-row">
+        <span class="shape-lbl">Width:</span>
+        <input type="number" id="shapeStrokeWidth" value="2" min="1" max="20" class="stroke-width">
+      </div>
+    </div>
   </div>
 </div>
 
+<!-- ── Bottom panel ───────────────────────────────────────────────────────── -->
 <div id="bottomPanel">
   <div id="timeline"></div>
   <div id="bottomControls">
@@ -292,7 +359,7 @@ body {
   </div>
 </div>
 
-<!-- Mobile slide-up panel -->
+<!-- ── Mobile slide-up panel ──────────────────────────────────────────────── -->
 <div id="paletteOverlay"></div>
 <div id="palettePanel">
   <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -324,7 +391,7 @@ body {
 
   <div class="panel-section">
     <h4>Brush size</h4>
-    <input type="number" id="brushSizeMobile" value="1" min="1" max="8"
+    <input type="number" id="brushSizeMobile" value="1" min="1" max="20"
       style="width:70px;font-size:14px;background:var(--bg);border:1.5px solid var(--border-mid);color:var(--text);padding:5px;border-radius:4px;text-align:center;">
   </div>
 
@@ -332,7 +399,7 @@ body {
     <h4>Zoom</h4>
     <div class="panel-row">
       <button class="tool-btn" id="btnZoomOutMobile" style="padding:5px 14px;font-size:16px;">−</button>
-      <span id="zoomLabelMobile" style="font-size:13px;color:var(--muted);padding:0 10px;">8×</span>
+      <span id="zoomLabelMobile" style="font-size:13px;color:var(--muted);padding:0 10px;">1×</span>
       <button class="tool-btn" id="btnZoomInMobile" style="padding:5px 14px;font-size:16px;">+</button>
     </div>
   </div>
@@ -345,76 +412,71 @@ body {
       <button class="tool-btn" id="btnRedoMobile" style="flex:1;padding:8px;" disabled>↪ Redo</button>
     </div>
   </div>
+
+  <!-- Shape options mobile — shown only when shape tool active -->
+  <div class="panel-section" id="shapeSectionMobile" style="display:none">
+    <h4>Shape type</h4>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;">
+      <button class="tool-btn active" id="btnSh_circle_m">● Circle</button>
+      <button class="tool-btn"        id="btnSh_square_m">■ Rect</button>
+      <button class="tool-btn"        id="btnSh_triangle_m">▲ Tri</button>
+      <button class="tool-btn"        id="btnSh_penta_m">⬠ Penta</button>
+    </div>
+    <h4>Fill</h4>
+    <label class="panel-row" style="margin-bottom:8px;">
+      <input type="checkbox" id="chkShapeFill_m" checked>
+      <span style="font-size:12px;color:var(--muted);">Filled (use palette color)</span>
+    </label>
+    <h4>Stroke</h4>
+    <label class="panel-row" style="margin-bottom:6px;">
+      <input type="checkbox" id="chkShapeStroke_m">
+      <span style="font-size:12px;color:var(--muted);">Add stroke</span>
+    </label>
+    <div class="panel-row">
+      <span class="panel-label">Color:</span>
+      <input type="color" id="shapeStrokePicker_m" value="#000000"
+        style="width:40px;height:30px;border:1.5px solid var(--border-mid);border-radius:3px;padding:0;cursor:pointer;">
+      <span class="panel-label" style="min-width:50px;">Width:</span>
+      <input type="number" id="shapeStrokeWidth_m" value="2" min="1" max="20"
+        style="width:60px;font-size:13px;background:var(--bg);border:1.5px solid var(--border-mid);color:var(--text);padding:4px;border-radius:4px;text-align:center;">
+    </div>
+  </div>
 </div>
 
 <script>
 // ─── Constants ────────────────────────────────────────────────────────────────
-const FRAME_COUNT = 8;
-const CANVAS_W    = 400;
-const CANVAS_H    = 400;
+const CANVAS_W = 400;
+const CANVAS_H = 400;
+const REF_CACHE_SIZE = 512;
+const MAX_UNDO = 50;
 
-// ─── Reference images (Richard Williams walk cycle poses) ─────────────────────
-const REF_FILENAMES = [
-  'walk_cycle_BASIC_reference_Williams.01.jpg',
-  'walk_cycle_BASIC_reference_Williams.02.jpg',
-  'walk_cycle_BASIC_reference_Williams.03.jpg',
-  'walk_cycle_BASIC_reference_Williams.04.jpg',
-  'walk_cycle_BASIC_reference_Williams.05.jpg',
-  'walk_cycle_BASIC_reference_Williams.06.jpg',
-  'walk_cycle_BASIC_reference_Williams.07.jpg',
-  'walk_cycle_BASIC_reference_Williams.08.jpg',
-];
-const REF_CACHE_SIZE = 512; // process at this res for quality at all zoom levels
-const refCached = new Array(FRAME_COUNT).fill(null); // offscreen canvases
-let refLoadedCount = 0;
-
-function processRefImage(img) {
-  // Draw original onto temp canvas at cache size
-  const tmp = document.createElement('canvas');
-  tmp.width = REF_CACHE_SIZE; tmp.height = REF_CACHE_SIZE;
-  const tc = tmp.getContext('2d');
-  tc.fillStyle = '#fff';
-  tc.fillRect(0, 0, REF_CACHE_SIZE, REF_CACHE_SIZE);
-  tc.drawImage(img, 0, 0, REF_CACHE_SIZE, REF_CACHE_SIZE);
-  const d = tc.getImageData(0, 0, REF_CACHE_SIZE, REF_CACHE_SIZE);
-
-  // Convert: white → transparent, dark lines → keep original pencil color with alpha
-  for (let i = 0; i < d.data.length; i += 4) {
-    const r = d.data[i], g = d.data[i+1], b = d.data[i+2];
-    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-    if (lum > 210) {
-      d.data[i+3] = 0; // white paper → transparent
-    } else {
-      // Dark line → keep original pencil gray, alpha proportional to darkness
-      const alpha = Math.min(1, (210 - lum) / 150);
-      d.data[i+3] = Math.round(alpha * 255);
-    }
-  }
-
-  const out = document.createElement('canvas');
-  out.width = REF_CACHE_SIZE; out.height = REF_CACHE_SIZE;
-  out.getContext('2d').putImageData(d, 0, 0);
-  return out;
-}
-
-function loadRefImages() {
-  const loading = document.getElementById('refLoading');
-  loading.textContent = 'Loading ref…';
-  REF_FILENAMES.forEach((filename, i) => {
-    const img = new Image();
-    img.onload = () => {
-      refCached[i] = processRefImage(img);
-      refLoadedCount++;
-      if (refLoadedCount === FRAME_COUNT) loading.textContent = '';
-      if (i === currentFrame) renderRef();
-    };
-    img.onerror = () => {
-      refLoadedCount++;
-      if (refLoadedCount === FRAME_COUNT) loading.textContent = '';
-    };
-    img.src = `walk_cycle_BASIC_reference_Williams/${filename}`;
-  });
-}
+// ─── Reference config ─────────────────────────────────────────────────────────
+const REF_CONFIG = {
+  '8frame': {
+    frameCount: 8,
+    folder: 'walk_cycle_BASIC_reference_Williams',
+    files: [
+      'walk_cycle_BASIC_reference_Williams.01.jpg',
+      'walk_cycle_BASIC_reference_Williams.02.jpg',
+      'walk_cycle_BASIC_reference_Williams.03.jpg',
+      'walk_cycle_BASIC_reference_Williams.04.jpg',
+      'walk_cycle_BASIC_reference_Williams.05.jpg',
+      'walk_cycle_BASIC_reference_Williams.06.jpg',
+      'walk_cycle_BASIC_reference_Williams.07.jpg',
+      'walk_cycle_BASIC_reference_Williams.08.jpg',
+    ],
+  },
+  '4frame': {
+    frameCount: 4,
+    folder: '4-frame_walk-cycles',
+    files: [
+      '4-frame-reference-WALK-CYCLE_01.jpg',
+      '4-frame-reference-WALK-CYCLE_02.jpg',
+      '4-frame-reference-WALK-CYCLE_03.jpg',
+      '4-frame-reference-WALK-CYCLE_04.jpg',
+    ],
+  },
+};
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 const PALETTE = [
@@ -424,12 +486,18 @@ const PALETTE = [
   '#00b894','#e17055','#a29bfe','#dfe6e9','#fdcb6e',
 ];
 
-// ─── State ────────────────────────────────────────────────────────────────────
+// ─── Runtime state ────────────────────────────────────────────────────────────
+let appMode     = null;   // '8frame' | '4frame'
+let frameCount  = 0;
+let frames      = [];
+let refCached   = [];
+let refLoadedCount = 0;
+
 let currentFrame    = 0;
 let tool            = 'pencil';
 let drawColor       = '#F0A500';
 let brushSize       = 1;
-let zoom            = 8;
+let zoom            = 1;
 let autoZoom        = true;
 let refVisible      = true;
 let refOpacityVal   = 0.30;
@@ -438,23 +506,34 @@ let isDrawing       = false;
 let lastX = -1, lastY = -1;
 let playInterval    = null;
 
+// Shape state
+let shapeType        = 'circle';
+let shapeFillEnabled = true;
+let shapeStrokeEnabled = false;
+let shapeStrokeColor = '#000000';
+let shapeStrokeWidth = 2;
+let isShaping        = false;
+let shapeStartX = 0, shapeStartY = 0;
+let shapeEndX   = 0, shapeEndY   = 0;
+let shiftHeld   = false;
+
 // Undo / redo
 const undoStack = [];
 const redoStack = [];
-const MAX_UNDO  = 50;
-
-const frames = Array.from({ length: FRAME_COUNT }, () => new ImageData(CANVAS_W, CANVAS_H));
 
 // ─── DOM refs ─────────────────────────────────────────────────────────────────
 const drawCanvas  = document.getElementById('drawCanvas');
 const refCanvas   = document.getElementById('refCanvas');
 const onionCanvas = document.getElementById('onionCanvas');
-const dc = drawCanvas.getContext('2d',  { willReadFrequently: true });
-const rc = refCanvas.getContext('2d');
-const oc = onionCanvas.getContext('2d');
+const shapeCanvas = document.getElementById('shapeCanvas');
+const dc  = drawCanvas .getContext('2d', { willReadFrequently: true });
+const rc  = refCanvas  .getContext('2d');
+const oc  = onionCanvas.getContext('2d');
+const sc2 = shapeCanvas.getContext('2d');
 
 // ─── Canvas sizing ────────────────────────────────────────────────────────────
 function resizeCanvasArea() {
+  if (!appMode) return;
   const area    = document.getElementById('canvasArea');
   const wrapper = document.getElementById('canvasWrapper');
   const size    = Math.min(area.clientWidth, area.clientHeight);
@@ -471,14 +550,15 @@ function resizeCanvasArea() {
 }
 
 function initCanvases() {
-  [drawCanvas, refCanvas, onionCanvas].forEach(c => {
+  [drawCanvas, refCanvas, onionCanvas, shapeCanvas].forEach(c => {
     c.width  = CANVAS_W * zoom;
     c.height = CANVAS_H * zoom;
   });
-  dc.imageSmoothingEnabled = false;
-  rc.imageSmoothingEnabled = true;
-  rc.imageSmoothingQuality = 'high';
-  oc.imageSmoothingEnabled = false;
+  dc.imageSmoothingEnabled  = false;
+  rc.imageSmoothingEnabled  = true;
+  rc.imageSmoothingQuality  = 'high';
+  oc.imageSmoothingEnabled  = false;
+  sc2.imageSmoothingEnabled = false;
 }
 
 // ─── Rendering ────────────────────────────────────────────────────────────────
@@ -491,7 +571,7 @@ function renderCurrentFrame() {
 
   oc.clearRect(0, 0, onionCanvas.width, onionCanvas.height);
   if (onionOpacityVal > 0) {
-    const prev = (currentFrame - 1 + FRAME_COUNT) % FRAME_COUNT;
+    const prev = (currentFrame - 1 + frameCount) % frameCount;
     const tmp2 = document.createElement('canvas');
     tmp2.width = CANVAS_W; tmp2.height = CANVAS_H;
     tmp2.getContext('2d').putImageData(frames[prev], 0, 0);
@@ -526,12 +606,58 @@ function updateThumbs() {
     el.classList.toggle('active', i === currentFrame));
 }
 
+// ─── Reference images ─────────────────────────────────────────────────────────
+function processRefImage(img) {
+  const tmp = document.createElement('canvas');
+  tmp.width = REF_CACHE_SIZE; tmp.height = REF_CACHE_SIZE;
+  const tc = tmp.getContext('2d');
+  tc.fillStyle = '#fff';
+  tc.fillRect(0, 0, REF_CACHE_SIZE, REF_CACHE_SIZE);
+  tc.drawImage(img, 0, 0, REF_CACHE_SIZE, REF_CACHE_SIZE);
+  const d = tc.getImageData(0, 0, REF_CACHE_SIZE, REF_CACHE_SIZE);
+  for (let i = 0; i < d.data.length; i += 4) {
+    const lum = 0.299*d.data[i] + 0.587*d.data[i+1] + 0.114*d.data[i+2];
+    if (lum > 210) {
+      d.data[i+3] = 0;
+    } else {
+      d.data[i+3] = Math.round(Math.min(1, (210-lum)/150) * 255);
+    }
+  }
+  const out = document.createElement('canvas');
+  out.width = REF_CACHE_SIZE; out.height = REF_CACHE_SIZE;
+  out.getContext('2d').putImageData(d, 0, 0);
+  return out;
+}
+
+function loadRefImages() {
+  const cfg = REF_CONFIG[appMode];
+  refCached = new Array(frameCount).fill(null);
+  refLoadedCount = 0;
+  const loading = document.getElementById('refLoading');
+  loading.textContent = 'Loading ref…';
+  cfg.files.forEach((filename, i) => {
+    const img = new Image();
+    img.onload = () => {
+      refCached[i] = processRefImage(img);
+      refLoadedCount++;
+      if (refLoadedCount === frameCount) loading.textContent = '';
+      if (i === currentFrame) renderRef();
+    };
+    img.onerror = () => {
+      refLoadedCount++;
+      if (refLoadedCount === frameCount) loading.textContent = '';
+    };
+    img.src = `${cfg.folder}/${filename}`;
+  });
+}
+
 // ─── Timeline ─────────────────────────────────────────────────────────────────
 function buildTimeline() {
+  if (!appMode) return;
   const tl = document.getElementById('timeline');
   Array.from(tl.querySelectorAll('.frame-thumb')).forEach(el => el.remove());
   const sz = thumbSize();
-  for (let i = 0; i < FRAME_COUNT; i++) {
+  for (let i = 0; i < frameCount; i++) {
     const wrap = document.createElement('div');
     wrap.className = 'frame-thumb' + (i === 0 ? ' active' : '');
     const tc = document.createElement('canvas');
@@ -540,6 +666,12 @@ function buildTimeline() {
     const num = document.createElement('span');
     num.className = 'frame-num'; num.textContent = i + 1;
     wrap.appendChild(num);
+    // Linked-frame badge in 4-frame mode
+    if (appMode === '4frame' && i === 2) {
+      const badge = document.createElement('span');
+      badge.className = 'frame-link'; badge.textContent = '=1';
+      wrap.appendChild(badge);
+    }
     wrap.addEventListener('click', () => switchFrame(i));
     tl.appendChild(wrap);
   }
@@ -571,7 +703,7 @@ function makeSwatch(hex, container) {
 }
 
 function buildPalette() {
-  ['palette', 'mobilePalette'].forEach(id => {
+  ['palette','mobilePalette'].forEach(id => {
     const el = document.getElementById(id);
     el.innerHTML = '';
     PALETTE.forEach(hex => makeSwatch(hex, el));
@@ -583,12 +715,10 @@ function updateUndoRedoBtns() {
   const canUndo = undoStack.length > 0;
   const canRedo = redoStack.length > 0;
   ['btnUndo','btnUndo2','btnUndoMobile'].forEach(id => {
-    const b = document.getElementById(id);
-    if (b) b.disabled = !canUndo;
+    const b = document.getElementById(id); if (b) b.disabled = !canUndo;
   });
   ['btnRedo','btnRedo2','btnRedoMobile'].forEach(id => {
-    const b = document.getElementById(id);
-    if (b) b.disabled = !canRedo;
+    const b = document.getElementById(id); if (b) b.disabled = !canRedo;
   });
 }
 
@@ -605,35 +735,39 @@ function pushUndo() {
 function undo() {
   if (!undoStack.length) return;
   const entry = undoStack.pop();
-  redoStack.push({
-    frameIndex: entry.frameIndex,
-    data: new Uint8ClampedArray(frames[entry.frameIndex].data),
-  });
+  redoStack.push({ frameIndex: entry.frameIndex, data: new Uint8ClampedArray(frames[entry.frameIndex].data) });
   currentFrame = entry.frameIndex;
   frames[entry.frameIndex] = new ImageData(entry.data, CANVAS_W, CANVAS_H);
-  renderCurrentFrame(); renderRef(); updateThumbs();
-  updateUndoRedoBtns();
+  syncLinkedFrames(entry.frameIndex);
+  renderCurrentFrame(); renderRef(); updateThumbs(); updateUndoRedoBtns();
 }
 
 function redo() {
   if (!redoStack.length) return;
   const entry = redoStack.pop();
-  undoStack.push({
-    frameIndex: entry.frameIndex,
-    data: new Uint8ClampedArray(frames[entry.frameIndex].data),
-  });
+  undoStack.push({ frameIndex: entry.frameIndex, data: new Uint8ClampedArray(frames[entry.frameIndex].data) });
   currentFrame = entry.frameIndex;
   frames[entry.frameIndex] = new ImageData(entry.data, CANVAS_W, CANVAS_H);
-  renderCurrentFrame(); renderRef(); updateThumbs();
-  updateUndoRedoBtns();
+  syncLinkedFrames(entry.frameIndex);
+  renderCurrentFrame(); renderRef(); updateThumbs(); updateUndoRedoBtns();
 }
 
-// ─── Drawing ──────────────────────────────────────────────────────────────────
+// ─── 4-frame sync (frames 0 ↔ 2 always identical) ────────────────────────────
+function syncLinkedFrames(idx) {
+  if (appMode !== '4frame') return;
+  if (idx === 0) {
+    frames[2] = new ImageData(new Uint8ClampedArray(frames[0].data), CANVAS_W, CANVAS_H);
+  } else if (idx === 2) {
+    frames[0] = new ImageData(new Uint8ClampedArray(frames[2].data), CANVAS_W, CANVAS_H);
+  }
+}
+
+// ─── Drawing (pencil / eraser / fill) ────────────────────────────────────────
 function canvasXY(clientX, clientY) {
   const rect = drawCanvas.getBoundingClientRect();
   return [
-    Math.floor((clientX - rect.left)  / zoom),
-    Math.floor((clientY - rect.top)   / zoom),
+    Math.floor((clientX - rect.left) / zoom),
+    Math.floor((clientY - rect.top)  / zoom),
   ];
 }
 function hexToRgba(hex) {
@@ -665,7 +799,7 @@ function drawLine(x0,y0,x1,y1) {
   let [dx,dy]=[Math.abs(x1-x0),Math.abs(y1-y0)];
   let [sx,sy]=[x0<x1?1:-1, y0<y1?1:-1];
   let err=dx-dy;
-  while(true) {
+  while(true){
     paintPixel(x0,y0);
     if(x0===x1&&y0===y1) break;
     const e2=2*err;
@@ -693,11 +827,20 @@ function floodFill(x,y) {
 }
 
 function startDraw(clientX, clientY) {
-  pushUndo(); // save state before each stroke
+  if (!appMode) return;
+  pushUndo();
   isDrawing = true;
-  const [x,y] = canvasXY(clientX,clientY);
-  if (tool==='fill') {
-    floodFill(x,y);
+  const [x,y] = canvasXY(clientX, clientY);
+
+  if (tool === 'shape') {
+    isShaping = true;
+    shapeStartX = x; shapeStartY = y;
+    shapeEndX   = x; shapeEndY   = y;
+    return;
+  }
+  if (tool === 'fill') {
+    floodFill(x, y);
+    syncLinkedFrames(currentFrame);
     renderCurrentFrame(); updateThumbs();
     return;
   }
@@ -707,42 +850,147 @@ function startDraw(clientX, clientY) {
 }
 
 function continueDraw(clientX, clientY) {
-  if (!isDrawing||tool==='fill') return;
-  const [x,y]=canvasXY(clientX,clientY);
-  if(x===lastX&&y===lastY) return;
-  drawLine(lastX,lastY,x,y);
+  if (!isDrawing) return;
+  const [x,y] = canvasXY(clientX, clientY);
+
+  if (tool === 'shape' && isShaping) {
+    shapeEndX = x; shapeEndY = y;
+    drawShapePreview();
+    return;
+  }
+  if (tool === 'fill') return;
+  if (x===lastX && y===lastY) return;
+  drawLine(lastX, lastY, x, y);
   lastX=x; lastY=y;
   renderCurrentFrame(); updateThumbs();
 }
 
-function stopDraw() { isDrawing=false; }
+function stopDraw() {
+  if (!isDrawing) return;
+  isDrawing = false;
+  if (tool === 'shape' && isShaping) {
+    isShaping = false;
+    clearShapeCanvas();
+    commitShape();
+    syncLinkedFrames(currentFrame);
+    renderCurrentFrame(); updateThumbs();
+    return;
+  }
+  syncLinkedFrames(currentFrame);
+}
 
 // Mouse
-drawCanvas.addEventListener('mousedown', e => startDraw(e.clientX, e.clientY));
+drawCanvas.addEventListener('mousedown', e => { e.preventDefault(); startDraw(e.clientX, e.clientY); });
 drawCanvas.addEventListener('mousemove', e => continueDraw(e.clientX, e.clientY));
 window.addEventListener('mouseup', stopDraw);
 
 // Touch
-drawCanvas.addEventListener('touchstart', e => {
-  e.preventDefault(); startDraw(e.touches[0].clientX, e.touches[0].clientY);
-}, { passive:false });
-drawCanvas.addEventListener('touchmove', e => {
-  e.preventDefault(); continueDraw(e.touches[0].clientX, e.touches[0].clientY);
-}, { passive:false });
-drawCanvas.addEventListener('touchend', e => { e.preventDefault(); stopDraw(); }, { passive:false });
+drawCanvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e.touches[0].clientX, e.touches[0].clientY); }, { passive:false });
+drawCanvas.addEventListener('touchmove',  e => { e.preventDefault(); continueDraw(e.touches[0].clientX, e.touches[0].clientY); }, { passive:false });
+drawCanvas.addEventListener('touchend',   e => { e.preventDefault(); stopDraw(); }, { passive:false });
+
+// ─── Shape drawing ────────────────────────────────────────────────────────────
+function applyShapeToCtx(ctx, x1, y1, x2, y2, strokeScale) {
+  let ex = x2, ey = y2;
+  if (shiftHeld) {
+    const dx = ex-x1, dy = ey-y1;
+    const sz = Math.max(Math.abs(dx), Math.abs(dy));
+    ex = x1 + Math.sign(dx || 1) * sz;
+    ey = y1 + Math.sign(dy || 1) * sz;
+  }
+  const minX=Math.min(x1,ex), maxX=Math.max(x1,ex);
+  const minY=Math.min(y1,ey), maxY=Math.max(y1,ey);
+  const cx=(minX+maxX)/2, cy=(minY+maxY)/2;
+  const rx=Math.max((maxX-minX)/2, 0.5), ry=Math.max((maxY-minY)/2, 0.5);
+  const w=maxX-minX, h=maxY-minY;
+
+  ctx.beginPath();
+  switch(shapeType) {
+    case 'circle':
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2);
+      break;
+    case 'square':
+      ctx.rect(minX, minY, w, h);
+      break;
+    case 'triangle':
+      ctx.moveTo(cx, minY);
+      ctx.lineTo(maxX, maxY);
+      ctx.lineTo(minX, maxY);
+      ctx.closePath();
+      break;
+    case 'penta':
+      for (let i=0; i<5; i++) {
+        const a = (i*2*Math.PI/5) - Math.PI/2;
+        const px = cx + rx*Math.cos(a), py = cy + ry*Math.sin(a);
+        i===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+      }
+      ctx.closePath();
+      break;
+  }
+  if (shapeFillEnabled) {
+    ctx.fillStyle = drawColor;
+    ctx.fill();
+  }
+  if (shapeStrokeEnabled) {
+    ctx.strokeStyle = shapeStrokeColor;
+    ctx.lineWidth   = shapeStrokeWidth * strokeScale;
+    ctx.stroke();
+  }
+}
+
+function drawShapePreview() {
+  sc2.clearRect(0, 0, shapeCanvas.width, shapeCanvas.height);
+  if (shapeStartX===shapeEndX && shapeStartY===shapeEndY) return;
+  applyShapeToCtx(sc2,
+    shapeStartX*zoom, shapeStartY*zoom,
+    shapeEndX  *zoom, shapeEndY  *zoom,
+    zoom
+  );
+}
+
+function clearShapeCanvas() {
+  sc2.clearRect(0, 0, shapeCanvas.width, shapeCanvas.height);
+}
+
+function commitShape() {
+  if (shapeStartX===shapeEndX && shapeStartY===shapeEndY) return;
+  const tmp = document.createElement('canvas');
+  tmp.width = CANVAS_W; tmp.height = CANVAS_H;
+  const tc = tmp.getContext('2d');
+  applyShapeToCtx(tc, shapeStartX, shapeStartY, shapeEndX, shapeEndY, 1);
+  const sd = tc.getImageData(0, 0, CANVAS_W, CANVAS_H);
+  const fd = frames[currentFrame];
+  for (let i=0; i<fd.data.length; i+=4) {
+    const sa = sd.data[i+3]/255; if (sa===0) continue;
+    const da = fd.data[i+3]/255;
+    const oa = sa + da*(1-sa);
+    if (oa > 0) {
+      fd.data[i]   = Math.round((sd.data[i]  *sa + fd.data[i]  *da*(1-sa))/oa);
+      fd.data[i+1] = Math.round((sd.data[i+1]*sa + fd.data[i+1]*da*(1-sa))/oa);
+      fd.data[i+2] = Math.round((sd.data[i+2]*sa + fd.data[i+2]*da*(1-sa))/oa);
+      fd.data[i+3] = Math.round(oa*255);
+    }
+  }
+}
 
 // ─── Tool buttons ─────────────────────────────────────────────────────────────
 function setTool(t) {
-  tool=t;
-  document.getElementById('btnPencil').classList.toggle('active', t==='pencil');
-  document.getElementById('btnEraser').classList.toggle('active', t==='eraser');
-  document.getElementById('btnFill'  ).classList.toggle('active', t==='fill');
+  tool = t;
+  ['pencil','eraser','fill','shape'].forEach(n =>
+    document.getElementById('btn'+n[0].toUpperCase()+n.slice(1)).classList.toggle('active', n===t)
+  );
+  const show = t === 'shape';
+  document.getElementById('shapeSection').style.display       = show ? 'flex' : 'none';
+  document.getElementById('shapeSectionMobile').style.display = show ? ''     : 'none';
 }
+
 document.getElementById('btnPencil').addEventListener('click', ()=>setTool('pencil'));
 document.getElementById('btnEraser').addEventListener('click', ()=>setTool('eraser'));
 document.getElementById('btnFill'  ).addEventListener('click', ()=>setTool('fill'));
+document.getElementById('btnShape' ).addEventListener('click', ()=>setTool('shape'));
 
 document.getElementById('colorPicker').addEventListener('input', e=>setColor(e.target.value));
+
 document.getElementById('brushSize').addEventListener('input', e=>{
   brushSize=Math.max(1,parseInt(e.target.value)||1);
   document.getElementById('brushSizeMobile').value=brushSize;
@@ -755,23 +1003,72 @@ document.getElementById('brushSizeMobile').addEventListener('input', e=>{
 document.getElementById('btnClear').addEventListener('click', ()=>{
   pushUndo();
   frames[currentFrame]=new ImageData(CANVAS_W,CANVAS_H);
+  syncLinkedFrames(currentFrame);
   renderCurrentFrame(); updateThumbs();
 });
 
-// Ref & onion
+// ─── Shape type buttons ───────────────────────────────────────────────────────
+function setShapeType(t) {
+  shapeType = t;
+  ['circle','square','triangle','penta'].forEach(s => {
+    document.getElementById('btnSh_'+s).classList.toggle('active', s===t);
+    document.getElementById('btnSh_'+s+'_m').classList.toggle('active', s===t);
+  });
+}
+['circle','square','triangle','penta'].forEach(s => {
+  document.getElementById('btnSh_'+s)  .addEventListener('click', ()=>setShapeType(s));
+  document.getElementById('btnSh_'+s+'_m').addEventListener('click', ()=>setShapeType(s));
+});
+
+// Shape fill
+document.getElementById('chkShapeFill').addEventListener('change', e=>{
+  shapeFillEnabled=e.target.checked;
+  document.getElementById('chkShapeFill_m').checked=shapeFillEnabled;
+});
+document.getElementById('chkShapeFill_m').addEventListener('change', e=>{
+  shapeFillEnabled=e.target.checked;
+  document.getElementById('chkShapeFill').checked=shapeFillEnabled;
+});
+
+// Shape stroke
+document.getElementById('chkShapeStroke').addEventListener('change', e=>{
+  shapeStrokeEnabled=e.target.checked;
+  document.getElementById('chkShapeStroke_m').checked=shapeStrokeEnabled;
+});
+document.getElementById('chkShapeStroke_m').addEventListener('change', e=>{
+  shapeStrokeEnabled=e.target.checked;
+  document.getElementById('chkShapeStroke').checked=shapeStrokeEnabled;
+});
+document.getElementById('shapeStrokePicker').addEventListener('input', e=>{
+  shapeStrokeColor=e.target.value;
+  document.getElementById('shapeStrokePicker_m').value=shapeStrokeColor;
+});
+document.getElementById('shapeStrokePicker_m').addEventListener('input', e=>{
+  shapeStrokeColor=e.target.value;
+  document.getElementById('shapeStrokePicker').value=shapeStrokeColor;
+});
+document.getElementById('shapeStrokeWidth').addEventListener('input', e=>{
+  shapeStrokeWidth=Math.max(1,parseInt(e.target.value)||1);
+  document.getElementById('shapeStrokeWidth_m').value=shapeStrokeWidth;
+});
+document.getElementById('shapeStrokeWidth_m').addEventListener('input', e=>{
+  shapeStrokeWidth=Math.max(1,parseInt(e.target.value)||1);
+  document.getElementById('shapeStrokeWidth').value=shapeStrokeWidth;
+});
+
+// ─── Ref & onion ──────────────────────────────────────────────────────────────
 function syncRefToggle() {
-  const label=refVisible?'Ref On':'Ref Off';
+  const lbl=refVisible?'Ref On':'Ref Off';
   ['btnToggleRef','btnToggleRefMobile'].forEach(id=>{
     const b=document.getElementById(id);
-    b.textContent=label;
-    b.classList.toggle('active',!refVisible);
+    b.textContent=lbl; b.classList.toggle('active',!refVisible);
   });
 }
 function toggleRef(){ refVisible=!refVisible; syncRefToggle(); renderRef(); }
 document.getElementById('btnToggleRef'      ).addEventListener('click', toggleRef);
 document.getElementById('btnToggleRefMobile').addEventListener('click', toggleRef);
 
-function syncRefSliders(val) {
+function syncRefSliders(val){
   refOpacityVal=val/100;
   document.getElementById('refOpacity').value=val;
   document.getElementById('refOpacityMobile').value=val;
@@ -780,7 +1077,7 @@ function syncRefSliders(val) {
 document.getElementById('refOpacity'      ).addEventListener('input', e=>syncRefSliders(+e.target.value));
 document.getElementById('refOpacityMobile').addEventListener('input', e=>syncRefSliders(+e.target.value));
 
-function syncOnionSliders(val) {
+function syncOnionSliders(val){
   onionOpacityVal=val/100;
   document.getElementById('onionOpacity').value=val;
   document.getElementById('onionOpacityMobile').value=val;
@@ -801,11 +1098,7 @@ document.getElementById('onionOpacityMobile').addEventListener('input', e=>syncO
 
 // ─── Zoom ─────────────────────────────────────────────────────────────────────
 function applyZoom(newZoom, disableAuto) {
-  if (disableAuto) {
-    autoZoom=false;
-    const cb=document.getElementById('chkAutoZoom');
-    if(cb) cb.checked=false;
-  }
+  if(disableAuto){ autoZoom=false; const cb=document.getElementById('chkAutoZoom'); if(cb) cb.checked=false; }
   zoom=Math.max(1,Math.min(2,newZoom));
   document.getElementById('zoomLabel').textContent=zoom+'×';
   document.getElementById('zoomLabelMobile').textContent=zoom+'×';
@@ -816,18 +1109,15 @@ document.getElementById('btnZoomOut'      ).addEventListener('click',()=>applyZo
 document.getElementById('btnZoomInMobile' ).addEventListener('click',()=>applyZoom(zoom+1,true));
 document.getElementById('btnZoomOutMobile').addEventListener('click',()=>applyZoom(zoom-1,true));
 document.getElementById('chkAutoZoom').addEventListener('change',e=>{
-  autoZoom=e.target.checked;
-  if(autoZoom) resizeCanvasArea();
+  autoZoom=e.target.checked; if(autoZoom) resizeCanvasArea();
 });
-
-const resizeObs = new ResizeObserver(()=>{ resizeCanvasArea(); buildTimeline(); updateThumbs(); });
-resizeObs.observe(document.getElementById('canvasArea'));
 
 // ─── Copy prev frame ──────────────────────────────────────────────────────────
 function copyPrevFrame() {
   pushUndo();
-  const prev=(currentFrame-1+FRAME_COUNT)%FRAME_COUNT;
+  const prev=(currentFrame-1+frameCount)%frameCount;
   frames[currentFrame]=new ImageData(new Uint8ClampedArray(frames[prev].data),CANVAS_W,CANVAS_H);
+  syncLinkedFrames(currentFrame);
   renderCurrentFrame(); updateThumbs(); closePalettePanel();
 }
 document.getElementById('btnCopyPrev'      ).addEventListener('click', copyPrevFrame);
@@ -835,31 +1125,31 @@ document.getElementById('btnCopyPrevMobile').addEventListener('click', copyPrevF
 
 // ─── Keyboard shortcuts ───────────────────────────────────────────────────────
 window.addEventListener('keydown', e => {
-  const meta = e.metaKey||e.ctrlKey;
-  // Undo: Ctrl/⌘+Z (without shift)
-  if (meta && !e.shiftKey && (e.key==='z'||e.key==='Z')) { e.preventDefault(); undo(); return; }
-  // Redo: Ctrl/⌘+Shift+Z  or  Ctrl+Y
-  if ((meta && e.shiftKey && (e.key==='z'||e.key==='Z')) ||
-      (e.ctrlKey && (e.key==='y'||e.key==='Y'))) { e.preventDefault(); redo(); return; }
+  if (e.key==='Shift') { shiftHeld=true; return; }
+  const meta=e.metaKey||e.ctrlKey;
+  if (meta&&!e.shiftKey&&(e.key==='z'||e.key==='Z')){ e.preventDefault(); undo(); return; }
+  if ((meta&&e.shiftKey&&(e.key==='z'||e.key==='Z'))||(e.ctrlKey&&(e.key==='y'||e.key==='Y'))){ e.preventDefault(); redo(); return; }
   if (e.target.tagName==='INPUT') return;
   if (e.key==='p'||e.key==='P') setTool('pencil');
   if (e.key==='e'||e.key==='E') setTool('eraser');
   if (e.key==='f'||e.key==='F') setTool('fill');
-  if (e.key==='['  ) applyZoom(zoom-1,true);
-  if (e.key===']'  ) applyZoom(zoom+1,true);
-  if (e.key==='ArrowRight') switchFrame((currentFrame+1)%FRAME_COUNT);
-  if (e.key==='ArrowLeft' ) switchFrame((currentFrame-1+FRAME_COUNT)%FRAME_COUNT);
+  if (e.key==='s'||e.key==='S') setTool('shape');
+  if (e.key==='[') applyZoom(zoom-1,true);
+  if (e.key===']') applyZoom(zoom+1,true);
+  if (e.key==='ArrowRight') switchFrame((currentFrame+1)%frameCount);
+  if (e.key==='ArrowLeft' ) switchFrame((currentFrame-1+frameCount)%frameCount);
 });
+window.addEventListener('keyup', e => { if (e.key==='Shift') shiftHeld=false; });
 
 // ─── Playback ─────────────────────────────────────────────────────────────────
-document.getElementById('btnPlay').addEventListener('click', () => {
+document.getElementById('btnPlay').addEventListener('click', ()=>{
   if (playInterval) {
     clearInterval(playInterval); playInterval=null;
     document.getElementById('btnPlay').textContent='▶ Play';
   } else {
     const fps=parseInt(document.getElementById('fpsInput').value)||8;
     playInterval=setInterval(()=>{
-      currentFrame=(currentFrame+1)%FRAME_COUNT;
+      currentFrame=(currentFrame+1)%frameCount;
       renderCurrentFrame(); renderRef(); updateThumbs();
     }, 1000/fps);
     document.getElementById('btnPlay').textContent='⏹ Stop';
@@ -879,28 +1169,27 @@ document.getElementById('btnPaletteToggle').addEventListener('click', openPalett
 document.getElementById('btnClosePalette' ).addEventListener('click', closePalettePanel);
 document.getElementById('paletteOverlay'  ).addEventListener('click', closePalettePanel);
 
-// ─── Export PNG sprite sheet (6400 × 800, transparent bg) ─────────────────────
-document.getElementById('btnExportPng').addEventListener('click', () => {
-  const FRAME_PX = 800;
-  const sheet = document.createElement('canvas');
-  sheet.width  = FRAME_PX*FRAME_COUNT; sheet.height = FRAME_PX;
-  const sc = sheet.getContext('2d');
-  sc.clearRect(0,0,sheet.width,sheet.height);
-  sc.imageSmoothingEnabled=false;
+// ─── Export PNG sprite sheet (transparent bg) ─────────────────────────────────
+document.getElementById('btnExportPng').addEventListener('click', ()=>{
+  const FRAME_PX=800;
+  const sheet=document.createElement('canvas');
+  sheet.width=FRAME_PX*frameCount; sheet.height=FRAME_PX;
+  const sctx=sheet.getContext('2d');
+  sctx.clearRect(0,0,sheet.width,sheet.height);
+  sctx.imageSmoothingEnabled=false;
   frames.forEach((frame,i)=>{
-    const tmp=document.createElement('canvas');
-    tmp.width=CANVAS_W; tmp.height=CANVAS_H;
+    const tmp=document.createElement('canvas'); tmp.width=CANVAS_W; tmp.height=CANVAS_H;
     tmp.getContext('2d').putImageData(frame,0,0);
-    sc.drawImage(tmp, i*FRAME_PX, 0, FRAME_PX, FRAME_PX);
+    sctx.drawImage(tmp,i*FRAME_PX,0,FRAME_PX,FRAME_PX);
   });
   const a=document.createElement('a');
   a.href=sheet.toDataURL('image/png');
-  a.download='walk_cycle_spritesheet.png'; a.click();
-  setStatus('PNG exported! (6400×800)');
+  a.download=`walk_cycle_${appMode}_spritesheet.png`; a.click();
+  setStatus('PNG exported!');
 });
 
-// ─── Export GIF (800×800, transparent bg, zero-dependency LZW) ───────────────
-document.getElementById('btnExportGif').addEventListener('click', () => {
+// ─── Export GIF (transparent bg, inline LZW) ──────────────────────────────────
+document.getElementById('btnExportGif').addEventListener('click', ()=>{
   const fps=parseInt(document.getElementById('fpsInput').value)||8;
   const delay=Math.round(100/fps);
   const W=800, H=800;
@@ -909,14 +1198,12 @@ document.getElementById('btnExportGif').addEventListener('click', () => {
   const allColors=new Set(['0,0,0']);
   frames.forEach(frame=>{
     for(let i=0;i<frame.data.length;i+=4)
-      if(frame.data[i+3]>0)
-        allColors.add(frame.data[i]+','+frame.data[i+1]+','+frame.data[i+2]);
+      if(frame.data[i+3]>0) allColors.add(frame.data[i]+','+frame.data[i+1]+','+frame.data[i+2]);
   });
   const colorList=[{r:0,g:0,b:0}];
   allColors.forEach(c=>{
     if(colorList.length>=256) return;
-    const[r,g,b]=c.split(',').map(Number);
-    colorList.push({r,g,b});
+    const[r,g,b]=c.split(',').map(Number); colorList.push({r,g,b});
   });
   while(colorList.length<256) colorList.push({r:0,g:0,b:0});
 
@@ -930,7 +1217,6 @@ document.getElementById('btnExportGif').addEventListener('click', () => {
     }
     return best;
   }
-
   function frameToIdx(frame){
     const tmp=document.createElement('canvas'); tmp.width=W; tmp.height=H;
     const tc=tmp.getContext('2d'); tc.imageSmoothingEnabled=false;
@@ -946,7 +1232,6 @@ document.getElementById('btnExportGif').addEventListener('click', () => {
     }
     return idx;
   }
-
   function lzwEncode(indices,minCode){
     const clear=1<<minCode,eof=clear+1;
     let codeSize=minCode+1,next=eof+1,table={},buf=0,bits=0;
@@ -976,7 +1261,6 @@ document.getElementById('btnExportGif').addEventListener('click', () => {
   push(0xf7); push(0); push(0);
   colorList.forEach(c=>{push(c.r);push(c.g);push(c.b);});
   pushStr('\x21\xff\x0bNETSCAPE2.0\x03\x01\x00\x00\x00');
-
   frames.forEach(frame=>{
     push(0x21);push(0xf9);push(0x04);
     push(0x09);u16(delay);push(0);push(0);
@@ -984,8 +1268,7 @@ document.getElementById('btnExportGif').addEventListener('click', () => {
     const mc=8; push(mc);
     const lzw=lzwEncode(frameToIdx(frame),mc);
     for(let i=0;i<lzw.length;i+=255){
-      const chunk=lzw.slice(i,i+255);
-      push(chunk.length);chunk.forEach(b=>push(b));
+      const chunk=lzw.slice(i,i+255); push(chunk.length); chunk.forEach(b=>push(b));
     }
     push(0);
   });
@@ -993,7 +1276,7 @@ document.getElementById('btnExportGif').addEventListener('click', () => {
 
   const blob=new Blob([new Uint8Array(bytes)],{type:'image/gif'});
   const url=URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url; a.download='walk_cycle.gif'; a.click();
+  const a=document.createElement('a'); a.href=url; a.download=`walk_cycle_${appMode}.gif`; a.click();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
   setStatus('GIF exported!');
 });
@@ -1003,14 +1286,41 @@ function setStatus(msg){
   setTimeout(()=>document.getElementById('status').textContent='',3000);
 }
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
-buildPalette();
-buildTimeline();
-resizeCanvasArea();
-updateThumbs();
-updateUndoRedoBtns();
-loadRefImages();
-window.addEventListener('load', ()=>{ resizeCanvasArea(); updateThumbs(); });
+// ─── startProject ─────────────────────────────────────────────────────────────
+function startProject(mode) {
+  appMode    = mode;
+  frameCount = REF_CONFIG[mode].frameCount;
+  frames     = Array.from({ length: frameCount }, ()=>new ImageData(CANVAS_W, CANVAS_H));
+  undoStack.length = 0;
+  redoStack.length = 0;
+  currentFrame = 0;
+
+  document.getElementById('startModal').style.display = 'none';
+
+  const lbl = document.getElementById('modeLabel');
+  lbl.textContent = mode === '4frame' ? '4-frame' : '8-frame';
+  lbl.style.display = '';
+
+  buildPalette();
+  buildTimeline();
+  resizeCanvasArea();
+  updateThumbs();
+  updateUndoRedoBtns();
+  loadRefImages();
+}
+
+// ─── Startup modal ────────────────────────────────────────────────────────────
+document.getElementById('btn8frame').addEventListener('click', ()=>startProject('8frame'));
+document.getElementById('btn4frame').addEventListener('click', ()=>startProject('4frame'));
+
+// ─── ResizeObserver ───────────────────────────────────────────────────────────
+const resizeObs = new ResizeObserver(()=>{
+  resizeCanvasArea();
+  if (appMode) { buildTimeline(); updateThumbs(); }
+});
+resizeObs.observe(document.getElementById('canvasArea'));
+
+window.addEventListener('load', ()=>{ if (appMode) { resizeCanvasArea(); updateThumbs(); } });
 </script>
 </body>
 </html>
