@@ -122,7 +122,8 @@ nav {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 8px 14px;
+  height: 36px;
+  padding: 0 14px;
   color: var(--black);
   text-decoration: none;
   font-size: 0.95rem;
@@ -134,6 +135,7 @@ nav {
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
   font-family: var(--font);
+  box-sizing: border-box;
 }
 .nav-links > li > a:hover,
 .nav-links > li > button.nav-parent:hover,
