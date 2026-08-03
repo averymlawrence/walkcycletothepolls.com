@@ -97,7 +97,7 @@ nav {
   width: auto;
 }
 .nav-logo-text {
-  color: var(--white);
+  color: var(--black);
   font-size: 0.85rem;
   font-weight: 700;
   line-height: 1.2;
@@ -123,7 +123,7 @@ nav {
   align-items: center;
   gap: 4px;
   padding: 8px 14px;
-  color: var(--white);
+  color: var(--black);
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 500;
@@ -139,13 +139,14 @@ nav {
 .nav-links > li > button.nav-parent:hover,
 .nav-links > li > a:focus-visible,
 .nav-links > li > button.nav-parent:focus-visible {
-  background: rgba(255,255,255,0.12);
-  color: var(--orange);
+  background: var(--yellow);
+  color: var(--black);
   outline: none;
 }
 .nav-links > li > a.active,
 .nav-links > li > button.nav-parent.active {
-  color: var(--orange);
+  background: var(--yellow);
+  color: var(--black);
 }
 
 .nav-arrow {
@@ -189,8 +190,8 @@ nav {
 }
 .dropdown li a:hover,
 .dropdown li a:focus-visible {
-  background: rgba(255,255,255,0.1);
-  color: var(--orange);
+  background: var(--yellow);
+  color: var(--black);
   outline: none;
 }
 
@@ -201,14 +202,14 @@ nav {
   border: none;
   cursor: pointer;
   padding: 8px;
-  color: var(--white);
+  color: var(--black);
   font-size: 1.5rem;
   line-height: 1;
   margin-left: 12px;
   border-radius: 4px;
 }
 .nav-toggle:focus-visible {
-  outline: 2px solid var(--orange);
+  outline: 2px solid var(--yellow);
 }
 
 /* Instagram link in nav */
@@ -216,13 +217,13 @@ nav {
   display: flex;
   align-items: center;
   padding: 8px 12px;
-  color: var(--white);
+  color: var(--black);
   text-decoration: none;
   opacity: 0.75;
   transition: opacity 0.15s, color 0.15s;
   font-size: 1.2rem;
 }
-.nav-instagram:hover { opacity: 1; color: var(--orange); }
+.nav-instagram:hover { opacity: 1; color: var(--black); }
 
 /* ── Mobile nav ───────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
@@ -242,7 +243,7 @@ nav {
     align-items: stretch;
     padding: 12px 0 24px;
     gap: 0;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 1px solid rgba(0,0,0,0.12);
     transition: top 0.25s ease;
     max-height: calc(100vh - var(--nav-height));
     overflow-y: auto;
@@ -256,12 +257,13 @@ nav {
     font-size: 1rem;
     border-radius: 0;
     justify-content: space-between;
+    width: 100%;
   }
   .dropdown {
     position: static;
     border: none;
     box-shadow: none;
-    background: rgba(255,255,255,0.05);
+    background: rgba(0,0,0,0.05);
     opacity: 1;
     visibility: visible;
     transform: none;
@@ -368,12 +370,18 @@ p:last-child { margin-bottom: 0; }
   border-color: var(--orange);
 }
 .btn--orange:hover { background: var(--orange-dark); border-color: var(--orange-dark); color: var(--black); }
-.btn--white {
-  background: var(--white);
+.btn--black {
+  background: var(--yellow);
   color: var(--black);
-  border-color: var(--white);
+  border-color: var(--yellow);
 }
-.btn--white:hover { background: var(--gray-light); border-color: var(--gray-mid); color: var(--black); }
+.btn--black:hover { background: #e6b800; border-color: #e6b800; color: var(--black); }
+.btn--white {
+  background: var(--yellow);
+  color: var(--black);
+  border-color: var(--yellow);
+}
+.btn--white:hover { background: #e6b800; border-color: #e6b800; color: var(--black); }
 .btn--outline-white {
   background: transparent;
   color: var(--white);
