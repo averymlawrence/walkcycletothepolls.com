@@ -9,7 +9,7 @@
   --white:       #FFFFFF;
   --purple:      #ff564b;
   --purple-dark: #e0372c;
-  --gray-light:  #f5e4d3;
+  --gray-light:  #f0f0f0;
   --gray-mid:    #E0E0E0;
   --gray:        #666666;
   --text:        #111111;
@@ -21,7 +21,7 @@
   --teal-mid:    #40a1b1;
   --yellow:      #ffcd00;
   --charcoal:    #565e62;
-  --cream:       #f5e4d3;
+  --cream:       #f0f0f0;
 
   --font: 'Roboto', Arial, sans-serif;
   --nav-height: 64px;
