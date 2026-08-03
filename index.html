@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="theme-color" content="#111111">
+  <meta name="theme-color" content="#ff564b">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Walk Cycle to the Polls — an animation project and civic celebration bridging walk cycles, civic history, and voter participation.">
   <title>Walk Cycle to the Polls</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=4">
+  <link rel="stylesheet" href="css/style.css?v=5">
   <!-- Open Graph -->
   <meta property="og:title" content="Walk Cycle to the Polls">
   <meta property="og:description" content="An animation project and civic celebration bridging walk cycles, civic history, and voter participation.">
-  <meta property="og:image" content="graphics/WCTTP-logo-BWP.svg">
+  <meta property="og:image" content="graphics/WCTTP-logo-26-WK.svg">
   <meta property="og:url" content="https://www.walkcycletothepolls.com">
 </head>
 <body>
@@ -24,7 +24,7 @@
   <nav aria-label="Main navigation">
     <div class="nav-inner">
     <a href="index.html" class="nav-logo" aria-label="Walk Cycle to the Polls — home">
-      <img src="graphics/WCTTP-logo-BWP.svg" alt="Walk Cycle to the Polls logo">
+      <img src="graphics/WCTTP-logo-26-WK.svg" alt="Walk Cycle to the Polls logo">
       <span class="nav-logo-text">Walk Cycle<br>to the Polls</span>
     </a>
     <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">☰</button>
@@ -60,8 +60,8 @@
       <section class="hero" aria-label="Welcome">
         <img
           class="hero__logo"
-          src="graphics/WCTTP-logo-BWP.svg"
-          alt="Walk Cycle to the Polls — logo showing a black postage-stamp design with white wavy lines on an orange background"
+          src="graphics/WCTTP-logo-26-KWBR.svg"
+          alt="Walk Cycle to the Polls logo"
         >
         <p class="hero__tagline">An animation project. A civic celebration.</p>
         <div class="btn-group" style="justify-content:center; position:relative; z-index:2;">
@@ -73,56 +73,62 @@
         <div class="hero__character-strip" aria-hidden="true" id="parade-strip"></div>
 
         <script>
-          // All student walk cycle GIFs
-          var paradeGifs = [
-            'images/Fuqua-Cal-WALK.2-transparent.gif',
-            'images/Biebel-Grace-P.3-FINAL.gif',
-            'images/Gasser-Elisa-P.3-FINAL.gif',
-            'images/Glynn-Olivia-P.3-FINAL.gif',
-            'images/Hoppe-Jane-P.3-FINAL.gif',
-            'images/Moreno-Ivan-P.3-FINAL.gif',
-            'images/Muqit-Shafiq-P.3-FINAL.gif',
-            'images/Nguyen-Alex-P.3-FINAL.gif',
-            'images/Peng-Michelle-P.3-FINAL.gif',
-            'images/St.Cyr-Oliver-P.3-FINAL.gif',
-            'images/Weinberg-Veronica-P.3-FINAL.gif',
-            'images/White-Nala-P.3-FINAL.gif',
-            'images/Williamson-Sophia-P.3-FINAL.gif'
-          ];
+          (function() {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-          // Shuffle so order varies on each load
-          paradeGifs.sort(function() { return Math.random() - 0.5; });
+            var paradeGifs = [
+              'images/Fuqua-Cal-WALK.2-transparent.gif',
+              'images/Biebel-Grace-P.3-FINAL.gif',
+              'images/Gasser-Elisa-P.3-FINAL.gif',
+              'images/Glynn-Olivia-P.3-FINAL.gif',
+              'images/Hoppe-Jane-P.3-FINAL.gif',
+              'images/Moreno-Ivan-P.3-FINAL.gif',
+              'images/Muqit-Shafiq-P.3-FINAL.gif',
+              'images/Nguyen-Alex-P.3-FINAL.gif',
+              'images/Peng-Michelle-P.3-FINAL.gif',
+              'images/St.Cyr-Oliver-P.3-FINAL.gif',
+              'images/Weinberg-Veronica-P.3-FINAL.gif',
+              'images/White-Nala-P.3-FINAL.gif',
+              'images/Williamson-Sophia-P.3-FINAL.gif'
+            ];
 
-          var strip = document.getElementById('parade-strip');
-          var screenW = window.innerWidth;
-          var pos = screenW; // start just off-screen right
+            paradeGifs.sort(function() { return Math.random() - 0.5; });
 
-          paradeGifs.forEach(function(src, i) {
-            var img = document.createElement('img');
-            img.src = src;
-            img.alt = '';
-            img.role = 'presentation';
-            img.style.position = 'absolute';
-            img.style.bottom = '0';
-            img.style.height = '90px';
-            img.style.width = 'auto';
+            var strip = document.getElementById('parade-strip');
+            var screenW = window.innerWidth;
+            var startX = screenW + 140; // all characters enter from just off-screen right
 
-            // Randomize gap between characters: 40–140px
-            var gap = 40 + Math.floor(Math.random() * 100);
-            var startPos = pos + gap;
-            pos = startPos;
+            function launch(img, speed) {
+              var dist = startX + 120; // total pixels to travel to reach -120px
+              img.style.transition = 'none';
+              img.style.left = startX + 'px';
+              // Double rAF ensures the browser paints the reset position before the transition begins
+              requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                  img.style.transition = 'left ' + (dist / speed).toFixed(1) + 's linear';
+                  img.style.left = '-120px';
+                });
+              });
+            }
 
-            // Duration scales with screen width so speed feels consistent across devices
-            // Base: ~160px/s on mobile, slower on wide screens
-            // Scale duration to screen width: wider screen = longer duration = same apparent speed
-            // Target ~80px/s on desktop, with ±20% randomization so they don't move in lockstep
-            var baseDuration = (screenW + 120) / 80;
-            var duration = (baseDuration * (0.8 + Math.random() * 0.4)).toFixed(1);
-            var delay = -(startPos / (screenW + 120)) * parseFloat(duration); // negative delay so they're already mid-walk on load
+            paradeGifs.forEach(function(src, i) {
+              var img = document.createElement('img');
+              img.src = src;
+              img.alt = '';
+              img.setAttribute('role', 'presentation');
+              img.style.cssText = 'position:absolute;bottom:0;height:90px;width:auto;left:' + startX + 'px;';
+              strip.appendChild(img);
 
-            img.style.animation = 'walk-across ' + duration + 's ' + delay + 's linear infinite';
-            strip.appendChild(img);
-          });
+              // Each character gets a slightly different speed (100–140px/s) so they drift apart over time
+              var speed = 100 + Math.random() * 40;
+
+              // Stagger entries: 1.2 s apart so the screen fills naturally rather than flooding all at once
+              setTimeout(function() {
+                launch(img, speed);
+                img.addEventListener('transitionend', function() { launch(img, speed); });
+              }, i * 1200);
+            });
+          })();
         </script>
 
       </section>
@@ -132,12 +138,12 @@
         <div class="container">
           <span class="eyebrow">The Project</span>
           <h2 id="intro-heading">Animation. History. Democracy.</h2>
-          <p class="lead">Walk Cycle to the Polls transforms the act of voting into a joyful, creative public event. Participants learn to animate their own 8-frame walk cycle characters, then race those characters to a virtual polling booth — before casting their real-world ballots.</p>
+          <p class="lead">Walk Cycle to the Polls transforms the act of voting into a joyful, creative public event. First, participants learn to create and animate their own characters. Then they race those characters in a video game to a virtual polling booth. Finally, they cast their real-world ballots and celebrate the democratic process.</p>
           <div class="card-grid mt-24">
             <div class="card">
               <div class="card__label">Animate</div>
               <h3>Create Your Character</h3>
-              <p>Learn the fundamentals of walk cycle animation from the tradition of Richard Williams and other masters. Draw 8 frames and bring your character to life.</p>
+              <p>Learn the fundamentals of a walk cycle animation and, in as few as 1 drawing and as many as 8, bring your character to life.</p>
             </div>
             <div class="card">
               <div class="card__label">Race</div>
@@ -147,7 +153,7 @@
             <div class="card">
               <div class="card__label">Vote</div>
               <h3>Cast Your Ballot</h3>
-              <p>After racing your avatar to the virtual polls, head to an early voting location and make your voice heard. Art and civic action, together.</p>
+              <p>After racing your avatar to the virtual polls, head to the physical polls and make your voice heard. Art and civic action, together.</p>
             </div>
           </div>
         </div>
@@ -157,7 +163,7 @@
       <section class="section section--black" aria-labelledby="2026-heading">
         <div class="container">
           <span class="eyebrow">Fall 2026 — The Semiquincentennial Update</span>
-          <h2 id="2026-heading" style="color:var(--white);">Bigger. Louder. More Accessible.</h2>
+          <h2 id="2026-heading" style="color:var(--white);">More Participants. More Characters. More Accessible. More Voting.</h2>
           <p class="lead" style="color:rgba(255,255,255,0.8);">For the 2026 midterm elections, the project expands from a single classroom into a university-wide and community-facing initiative — with public workshops, a visit from legendary animator James Baxter, and tournaments at early voting sites across Ann Arbor.</p>
           <div class="btn-group">
             <a class="btn btn--orange" href="about.html">Read the Full Story</a>
@@ -191,17 +197,17 @@
             <div class="card">
               <div class="card__label">Learn</div>
               <h3><a href="walking/walk-cycles.html">Walk Cycles</a></h3>
-              <p>Understand the 8 key positions of a walk cycle and the principles behind character animation.</p>
+              <p>Learn about walk cycles and the principles behind character animation.</p>
             </div>
             <div class="card">
               <div class="card__label">History</div>
               <h3><a href="walking/history.html">History of Walking</a></h3>
-              <p>From suffragette marches to Selma — the long history of walking as a civic and political act.</p>
+              <p>Get inspired by the long history of walking as a civic and political act, from suffragette marches to Selma.</p>
             </div>
             <div class="card">
               <div class="card__label">Create</div>
               <h3><a href="walking/make-a-walk-cycle.html">Make a Walk Cycle</a></h3>
-              <p>Use our online tool to draw your own 8-frame walk cycle and submit it to the game.</p>
+              <p>Use our online tool to draw your own 1-, 2-, 4- or 8-frame walk cycle and submit it to the game.</p>
             </div>
             <div class="card">
               <div class="card__label">Vote</div>
@@ -219,7 +225,7 @@
       <div class="footer-inner">
         <div>
           <div class="footer-logo">
-            <img src="graphics/WCTTP-logo-BWP.svg" alt="Walk Cycle to the Polls">
+            <img src="graphics/WCTTP-logo-26-WK.svg" alt="Walk Cycle to the Polls">
           </div>
           <div class="footer-copy">
             <p>An interdisciplinary civic art initiative at the<br>
