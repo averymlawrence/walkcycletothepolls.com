@@ -96,17 +96,17 @@
 
             var strip = document.getElementById('parade-strip');
             var screenW = window.innerWidth;
-            var startX = screenW + 140; // all characters enter from just off-screen right
+            var endX = screenW + 140; // destination: just off-screen right
 
             function launch(img, speed) {
-              var dist = startX + 120; // total pixels to travel to reach -120px
+              var dist = endX + 120; // total pixels to travel from -120px to endX
               img.style.transition = 'none';
-              img.style.left = startX + 'px';
+              img.style.left = '-120px'; // start off-screen left
               // Double rAF ensures the browser paints the reset position before the transition begins
               requestAnimationFrame(function() {
                 requestAnimationFrame(function() {
                   img.style.transition = 'left ' + (dist / speed).toFixed(1) + 's linear';
-                  img.style.left = '-120px';
+                  img.style.left = endX + 'px';
                 });
               });
             }
@@ -116,7 +116,7 @@
               img.src = src;
               img.alt = '';
               img.setAttribute('role', 'presentation');
-              img.style.cssText = 'position:absolute;bottom:0;height:90px;width:auto;left:' + startX + 'px;';
+              img.style.cssText = 'position:absolute;bottom:0;height:90px;width:auto;left:-120px;';
               strip.appendChild(img);
 
               // Each character gets a slightly different speed (100–140px/s) so they drift apart over time
