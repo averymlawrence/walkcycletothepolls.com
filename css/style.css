@@ -375,15 +375,15 @@ p:last-child { margin-bottom: 0; }
 .btn--black {
   background: var(--yellow);
   color: var(--black);
-  border-color: var(--yellow);
+  border-color: var(--black);
 }
-.btn--black:hover { background: #e6b800; border-color: #e6b800; color: var(--black); }
+.btn--black:hover { background: #e6b800; border-color: var(--black); color: var(--black); }
 .btn--white {
   background: var(--yellow);
   color: var(--black);
-  border-color: var(--yellow);
+  border-color: var(--black);
 }
-.btn--white:hover { background: #e6b800; border-color: #e6b800; color: var(--black); }
+.btn--white:hover { background: #e6b800; border-color: var(--black); color: var(--black); }
 .btn--outline-white {
   background: transparent;
   color: var(--white);
