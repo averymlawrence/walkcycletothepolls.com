@@ -39,7 +39,7 @@
     color: var(--muted);
     margin-bottom: 28px;
     line-height: 1.5;
-}
+  }
   .submit-form {
     display: flex;
     flex-direction: column;
@@ -54,6 +54,25 @@
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 40px 30px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--text);
+  }
+  input {
+    padding: 6px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border-style: none;
+    background-color: var(--border-mid);
+    color: var(--text);
+  }
+  input[type=submit] {
+    border-style: solid;
+    background-color: var(--panel);
+    border-color: var(--yellow);
+    color: var(--yellow);
   }
   .character-preview {
     background-color: var(--canvas-bg);
@@ -118,7 +137,6 @@
           <input type="text" id="name" name="name" placeholder="Walk-man" required>
           <label for="email">Email: (optional)</label>
           <input type="email" id="email" name="email" placeholder="your-email@example.com">
-          <br>
           <input type="submit">
         </form>
       </div>
