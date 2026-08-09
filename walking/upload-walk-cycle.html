@@ -4,39 +4,65 @@
   <meta charset="UTF-8">
   <meta name="theme-color" content="#ff564b">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Make your own walk cycle animation using our online drawing tool — then submit your character to the Walk Cycle to the Polls game.">
-  <title>Make a Walk Cycle — Walk Cycle to the Polls</title>
+  <meta name="description" content="Upload your custom walk cycle to the Walk Cycle to the Polls game.">
+  <title>Upload a Walk Cycle — Walk Cycle to the Polls</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css?v=10">
   <style>
-    .tool-intro {
-      background: var(--orange);
-      padding: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .tool-intro p {
-      margin: 0;
-      font-size: 0.95rem;
-      font-weight: 500;
-      max-width: 600px;
-    }
-    .tool-intro a {
-      color: var(--black);
-      white-space: nowrap;
-    }
-    .tool-embed {
-      width: 100%;
-      height: calc(100vh - var(--nav-height) - 72px);
-      min-height: 560px;
-      border: none;
-      display: block;
-    }
+  :root {
+    --yellow:     #F0A500;
+    --purple:     #A07CC5;
+    --purple-dim: #7A5A9A;
+    --bg:         #111111;
+    --panel:      #1A1A1A;
+    --border:     #2E2E2E;
+    --border-mid: #3A3A3A;
+    --canvas-bg:  #FFFFFF;
+    --text:       #FFFFFF;
+    --muted:      #888888;
+  }
+  main {
+    background: var(--bg); color: var(--text);
+    font-family: 'Roboto', sans-serif;
+    display: flex; flex-direction: column; height: 100dvh; overflow: hidden;
+  }
+  main h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--yellow);
+    margin-bottom: 8px;
+  }
+  main p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 28px;
+    line-height: 1.5;
+}
+  .submit-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--panel);
+    margin: 50px;
+    text-align: center;
+    max-width: 420px;
+    min-width: 300px;
+    width: 90%;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 40px 30px;
+  }
+  .character-preview {
+    background-color: var(--canvas-bg);
+    width: 256px;
+    height: 256px;
+  }
+  .sheet-preview {
+    width: 256px;
+  }
   </style>
 </head>
 <body>
@@ -60,8 +86,8 @@
         <ul class="dropdown" role="list">
           <li><a href="walk-cycles.html">Walk Cycles</a></li>
           <li><a href="history.html">History of Walking</a></li>
-          <li><a href="make-a-walk-cycle.html" class="active">Make a Walk Cycle</a></li>
-          <li><a href="upload-walk-cycle.html">Contribute to the Game!</a></li>
+          <li><a href="make-a-walk-cycle.html">Make a Walk Cycle</a></li>
+          <li><a href="upload-walk-cycle.html" class ="active">Contribute to the Game!</a></li>
         </ul>
       </li>
       <li><a href="../voting.html">Voting</a></li>
@@ -75,19 +101,27 @@
   </nav>
 
   <div class="page-wrapper" style="display:flex; flex-direction:column;">
-    <main id="main-content" style="flex:1; display:flex; flex-direction:column;">
+    <main id="main-content" style="flex:1; display:flex; flex-direction:column; align-items: center;">
 
-      <div class="tool-intro" role="note">
-        <p>Draw your 8-frame walk cycle below. New to walk cycles? <a href="walk-cycles.html">Read the guide first.</a></p>
-        <a class="btn btn--black" href="../voting.html" style="background:var(--black);color:var(--white); font-size:0.85rem; padding:8px 16px;">Register to Vote &rarr;</a>
+
+      <div class="submit-form">
+        <h2>Upload Walk Cycle to Game</h2>
+        <P>note: the walk cycle must be uploaded as a singular sprite sheet, where the width and height of each sprite are equal.</P>
+
+        <canvas class="character-preview" id="character-preview">Sorry, your browser does not support canvas.</canvas>
+        <img class="sheet-preview" id="sheet-preview" src="..\images\Nguyen-Alex-P.3-FINAL.png">
+        
+        <form id="upload-form" style="display: flex; flex-direction: column; text-align: left;">
+          <label for="sprite-sheet">Spritesheet:</label>
+          <input type="file" name="sprite-sheet" id="sprite-sheet" accept="image/png" required>
+          <label for="name">Character Name:</label>
+          <input type="text" id="name" name="name" placeholder="Walk-man" required>
+          <label for="email">Email: (optional)</label>
+          <input type="email" id="email" name="email" placeholder="your-email@example.com">
+          <br>
+          <input type="submit">
+        </form>
       </div>
-
-      <iframe
-        class="tool-embed"
-        src="../tool/index.html"
-        title="Walk Cycle Pixel Art Tool — draw your 8-frame character animation"
-        allowfullscreen
-      ></iframe>
 
     </main>
 
@@ -119,4 +153,70 @@
 
   <script src="../js/nav.js"></script>
 </body>
+<script>
+const apiEndpoint = "https://dfiv0rwmt3.execute-api.us-east-1.amazonaws.com/Default/characters";
+const form = document.getElementById("upload-form");
+
+const spritesheet_upload = document.getElementById("sprite-sheet");
+const sheet_preview = document.getElementById("sheet-preview");
+
+const character_preview = document.getElementById("character-preview");
+const ctx = character_preview.getContext("2d");
+
+sprite_num = 0;
+setInterval(function() {
+  ctx.clearRect(0,0,character_preview.width, character_preview.height);
+  ctx.drawImage(sheet_preview, sprite_num*sheet_preview.naturalHeight, 0, sheet_preview.naturalHeight, sheet_preview.naturalHeight, 0, 0, character_preview.width, character_preview.height);
+  sprite_num++;
+  if (sprite_num * sheet_preview.naturalHeight >= sheet_preview.naturalWidth)
+  {
+    sprite_num = 0;
+  }
+}, 1000 / 8);
+
+// Set the new spritesheet
+spritesheet_upload.addEventListener("input", (e) => {
+  const file = spritesheet_upload.files[0];
+
+  fr = new FileReader();
+  fr.onload = function(event) {
+    var uri = event.target.result;
+    sheet_preview.src = uri;
+  }
+  
+  fr.readAsDataURL(file);
+})
+
+form.addEventListener("submit", (e) => {  
+  e.preventDefault();  
+
+  const formData = new FormData(form);
+
+  fr = new FileReader();
+  fr.onload = function(event) {
+
+    base64String = event.target.result.replace("data:", "").replace(/^.+,/, "");
+
+    console.log(base64String);
+
+    let headers = new Headers();
+    // headers.append('Access-Control-Allow-Credentials', 'true');
+
+    fetch(apiEndpoint, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({
+        name: formData.get("name"), 
+        email: formData.get("email"), 
+        frames: base64String
+      })
+    })
+    .then((response) => response.json())
+    .then((json) => console.log(json))
+  }
+ 
+  fr.readAsDataURL(spritesheet_upload.files[0]);
+});  
+
+</script>
 </html>
