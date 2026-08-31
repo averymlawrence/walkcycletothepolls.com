@@ -74,8 +74,15 @@
     border-color: var(--yellow);
     color: var(--yellow);
   }
+  input[type=submit]:hover {
+    border-style: solid;
+    background-color: var(--yellow);
+    border-color: var(--yellow);
+    color: var(--panel);
+    cursor:pointer;
+  }
   .character-preview {
-    background-color: var(--canvas-bg);
+    background-color: var(--panel);
     width: 256px;
     height: 256px;
   }
@@ -139,6 +146,7 @@
           <input type="email" id="email" name="email" placeholder="your-email@example.com">
           <input type="submit">
         </form>
+        <p id="submit_status"></p>
       </div>
 
     </main>
@@ -229,7 +237,14 @@ form.addEventListener("submit", (e) => {
         frames: base64String
       })
     })
-    .then((response) => response.json())
+    .then((response) => {
+      let status = document.getElementById("submit_status")
+      if (response.ok)
+        status.innerHTML = "Success!"
+      else
+        status.innerHTML = "Failed..."
+      return response.json();}
+      )
     .then((json) => console.log(json))
   }
  
