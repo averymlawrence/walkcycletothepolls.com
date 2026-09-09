@@ -33,6 +33,22 @@
     }
     .vote-step__content h3 { margin-bottom: 8px; }
     .vote-step__content p { color: var(--gray); margin-bottom: 12px; }
+    .voting-columns {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      align-items: stretch;
+    }
+    @media (min-width: 768px) {
+      .voting-columns { grid-template-columns: 1fr 1fr; }
+    }
+    .voting-columns .vote-highlight { margin: 0; height: 100%; }
+    .voting-columns .voting-col-michigan {
+      background: var(--white);
+      border: 1px solid var(--gray-mid);
+      border-radius: 8px;
+      padding: 32px;
+    }
   </style>
 </head>
 <body>
@@ -49,6 +65,7 @@
     <ul class="nav-links" id="nav-links" role="list">
       <li><a href="index.html">Home</a></li>
       <li><a href="about.html">About</a></li>
+      <li><a href="events.html">Events</a></li>
       <li>
         <button class="nav-parent" aria-expanded="false" aria-haspopup="true">
           Walking <span class="nav-arrow" aria-hidden="true">▾</span>
@@ -81,22 +98,46 @@
         </div>
       </header>
 
-      <!-- Big CTA -->
+      <!-- Voting in Michigan / Voting outside Michigan -->
       <section class="section" aria-labelledby="register-heading">
         <div class="container">
-          <div class="vote-highlight">
-            <span class="eyebrow" style="color:var(--black); opacity:0.6;">Non-partisan voter information</span>
-            <h2 id="register-heading">Ready to Register?</h2>
-            <p>Vote.org is a nonpartisan resource that makes it easy to register, check your registration, and find your polling place — in every state.</p>
-            <a
-              class="btn btn--black"
-              href="https://www.vote.org"
-              target="_blank"
-              rel="noopener noreferrer"
-              style="font-size:1.1rem; padding:16px 36px;"
-            >
-              Go to Vote.org &rarr;
-            </a>
+          <div class="voting-columns">
+
+            <div class="voting-col-michigan prose" aria-labelledby="michigan-heading">
+              <span class="eyebrow">Michigan Voters</span>
+              <h2 id="michigan-heading">Voting in Michigan?</h2>
+              <p>Michigan has some of the most accessible voting laws in the country. Here are the key things to know:</p>
+              <ul>
+                <li><strong>Same-Day Registration:</strong> You can register to vote at your polling place on Election Day in Michigan. Bring proof of residency.</li>
+                <li><strong>Early Voting:</strong> Michigan offers at least 9 days of early voting before each election. Check your local clerk's website for exact dates and locations.</li>
+                <li><strong>Absentee Voting:</strong> Any registered Michigan voter can request an absentee ballot — no excuse required.</li>
+                <li><strong>Student Voters:</strong> University of Michigan students can register and vote using their campus address.</li>
+              </ul>
+
+              <div style="margin-top:24px; padding:24px 28px; border:2px solid var(--teal); border-radius:8px; background:var(--cream);">
+                <span class="eyebrow">A U-M Resource</span>
+                <h3 style="margin-top:8px;">UMICH Votes</h3>
+                <p style="margin-top:10px;">Walk Cycle to the Polls started right here at the University of Michigan &mdash; so we want to spotlight <a href="https://govote.umich.edu/" target="_blank" rel="noopener noreferrer"><strong>govote.umich.edu</strong></a>, U-M&rsquo;s own hub for registering to vote, checking your registration, and finding your polling place as a Wolverine.</p>
+                <a class="btn btn--black" href="https://govote.umich.edu/" target="_blank" rel="noopener noreferrer" style="margin-top:16px; display:inline-block;">Visit govote.umich.edu &rarr;</a>
+              </div>
+              <p class="mt-16">For the most current and detailed information about Michigan voting rules, visit the <a href="https://mvic.sos.state.mi.us/" target="_blank" rel="noopener noreferrer">Michigan Voter Information Center</a>.</p>
+            </div>
+
+            <div class="vote-highlight">
+              <span class="eyebrow" style="color:var(--black); opacity:0.6;">Non-partisan voter information</span>
+              <h2 id="outside-michigan-heading">Voting outside Michigan?</h2>
+              <p>Vote.org is a nonpartisan resource that makes it easy to register, check your registration, and find your polling place — in every state.</p>
+              <a
+                class="btn btn--black"
+                href="https://www.vote.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                style="font-size:1.1rem; padding:16px 36px;"
+              >
+                Go to Vote.org &rarr;
+              </a>
+            </div>
+
           </div>
         </div>
       </section>
@@ -135,29 +176,6 @@
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      <!-- Michigan specific info -->
-      <section class="section" aria-labelledby="michigan-heading">
-        <div class="container prose">
-          <span class="eyebrow">Michigan Voters</span>
-          <h2 id="michigan-heading">Voting in Michigan</h2>
-          <p>Michigan has some of the most accessible voting laws in the country. Here are the key things to know:</p>
-          <ul>
-            <li><strong>Same-Day Registration:</strong> You can register to vote at your polling place on Election Day in Michigan. Bring proof of residency.</li>
-            <li><strong>Early Voting:</strong> Michigan offers at least 9 days of early voting before each election. Check your local clerk's website for exact dates and locations.</li>
-            <li><strong>Absentee Voting:</strong> Any registered Michigan voter can request an absentee ballot — no excuse required.</li>
-            <li><strong>Student Voters:</strong> University of Michigan students can register and vote using their campus address.</li>
-          </ul>
-
-          <div style="margin-top:28px; padding:28px 32px; border:2px solid var(--teal); border-radius:8px; background:var(--cream);">
-            <span class="eyebrow">A U-M Resource</span>
-            <h3 style="margin-top:8px;">Proud to Be Born at Michigan</h3>
-            <p style="margin-top:10px;">Walk Cycle to the Polls started right here at the University of Michigan &mdash; so we want to spotlight <a href="https://govote.umich.edu/" target="_blank" rel="noopener noreferrer"><strong>govote.umich.edu</strong></a>, U-M&rsquo;s own hub for registering to vote, checking your registration, and finding your polling place as a Wolverine.</p>
-            <a class="btn btn--black" href="https://govote.umich.edu/" target="_blank" rel="noopener noreferrer" style="margin-top:16px; display:inline-block;">Visit govote.umich.edu &rarr;</a>
-          </div>
-          <p class="mt-16">For the most current and detailed information about Michigan voting rules, visit the <a href="https://mvic.sos.state.mi.us/" target="_blank" rel="noopener noreferrer">Michigan Voter Information Center</a>.</p>
         </div>
       </section>
 

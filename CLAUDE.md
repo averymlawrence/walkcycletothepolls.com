@@ -31,13 +31,18 @@
 │   └── logo-walk-cycle-to-the-polls.png   ← Main logo (black stamp on orange bg)
 ├── images/
 │   └── Fuqua-Cal-WALK.2-transparent.gif   ← Walk cycle animation (homepage hero)
+├── events.html            ← Events page (split out of about.html, Sept 2026)
 ├── walking/
-│   ├── walk-cycles.html       ← How walk cycles work (Richard Williams, 8 positions)
-│   ├── history.html           ← History of walking as civic act (Selma, suffragettes, etc.)
-│   └── make-a-walk-cycle.html ← Wrapper page that iframes the tool
+│   ├── walk-cycles.html       ← How walk cycles work (8 positions, with reference photos)
+│   ├── history.html           ← History of voting-rights marches (Selma, suffragettes, etc. — no longer Bonus Army/Labor Day)
+│   ├── make-a-walk-cycle.html ← Wrapper page that iframes the tool
+│   └── upload-walk-cycle.html ← "Contribute to the Game!" upload flow (added by a separate session)
 └── tool/
-    └── index.html             ← The pixel-art walk cycle animation tool (936 lines, self-contained)
+    └── index.html             ← The pixel-art walk cycle animation tool, self-contained
 ```
+
+## Nav structure (current)
+Home | About | **Events** | Walking (dropdown: Walk Cycles / History of Walking / Make a Walk Cycle / Contribute to the Game!) | Voting
 
 ## Navigation structure
 - **Home** | **About** | **Walking** (dropdown: Walk Cycles / History of Walking / Make a Walk Cycle) | **Voting**
@@ -66,7 +71,7 @@ GitHub Pages auto-deploys ~1 minute after push. No build step needed — pure HT
 - **Homepage rolling hills** — Removed wavy SVG background from hero section.
 - **Walk cycle tool** — Synced from Game folder; always copy from `/Users/averylawrence/Documents/Stamps/Intro to Animation/WCTTP Website/Walk Cycle to the Polls Game 2026 - Claude/index.html` to `tool/index.html` (note: both folders now live inside the `WCTTP Website` container folder). Also copy any new reference image folders. Currently in `tool/`: `walk_cycle_BASIC_reference_Williams/` (8 JPEGs), `4-frame_walk-cycles/` (4 JPEGs), `cartoon_walk_cycle_reference/` (8 JPEGs), and `human_walk_cycle_reference/` (8 JPEGs). GIF files in those folders do NOT need to be copied — tool only loads JPEGs.
 - **Drawing canvas resolution** — `CANVAS_W`/`CANVAS_H` in `tool/index.html` are 800×800 (bumped from 400×400 in Sept 2026 to match the fixed 800×800 export size — drawing was previously upscaled 2x on export, causing extra pixelation).
-- **Reference style selector (8-frame mode only)** — `REF_STYLES_8FRAME` in `tool/index.html` lets the user pick between `williams` (classic, default), `cartoon`, and `human` reference overlays via a dropdown next to the Ref opacity slider. 4-frame and 1-frame modes are unaffected and still use `REF_CONFIG`.
+- **Reference style selector (8-frame mode only)** — `REF_STYLES_8FRAME` in `tool/index.html` lets the user pick between `human` (default, Sept 2026) and `cartoon` reference overlays via a dropdown next to the Ref opacity slider. The old `williams` option was retired at Avery's request. 4-frame and 1-frame modes are unaffected and still use `REF_CONFIG`.
 
 ## Things still to do / pending decisions
 - **Team/Collaborators section** on About page: removed for now, Avery needs to decide on attribution format before adding back. The full collaborator list is preserved in this file below.

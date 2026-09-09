@@ -279,9 +279,8 @@ body {
   <label class="slider-label desktop-only">Ref:<input type="range" id="refOpacity" min="0" max="100" value="60"></label>
   <button class="tool-btn desktop-only" id="btnToggleRef">Ref On</button>
   <select id="refStyleSelect" class="desktop-only tool-btn" title="Reference style" style="display:none;">
-    <option value="williams">Classic (Williams)</option>
-    <option value="cartoon">Cartoon</option>
     <option value="human">Human</option>
+    <option value="cartoon">Cartoon</option>
   </select>
   <div class="sep desktop-only"></div>
   <label class="slider-label desktop-only">Onion:<input type="range" id="onionOpacity" min="0" max="60" value="20"></label>
@@ -407,9 +406,8 @@ body {
     <div class="panel-row" id="refStyleRowMobile" style="display:none; margin-top:8px;">
       <span class="panel-label">Style:</span>
       <select id="refStyleSelectMobile" style="flex:1;background:var(--bg);border:1.5px solid var(--border-mid);color:var(--text);padding:5px;border-radius:4px;">
-        <option value="williams">Classic (Williams)</option>
-        <option value="cartoon">Cartoon</option>
         <option value="human">Human</option>
+        <option value="cartoon">Cartoon</option>
       </select>
     </div>
   </div>
@@ -529,20 +527,6 @@ const REF_CONFIG = {
 
 // Selectable reference styles for 8-frame mode
 const REF_STYLES_8FRAME = {
-  williams: {
-    label: 'Classic (Williams)',
-    folder: 'walk_cycle_BASIC_reference_Williams',
-    files: [
-      'walk_cycle_BASIC_reference_Williams.01.jpg',
-      'walk_cycle_BASIC_reference_Williams.02.jpg',
-      'walk_cycle_BASIC_reference_Williams.03.jpg',
-      'walk_cycle_BASIC_reference_Williams.04.jpg',
-      'walk_cycle_BASIC_reference_Williams.05.jpg',
-      'walk_cycle_BASIC_reference_Williams.06.jpg',
-      'walk_cycle_BASIC_reference_Williams.07.jpg',
-      'walk_cycle_BASIC_reference_Williams.08.jpg',
-    ],
-  },
   cartoon: {
     label: 'Cartoon',
     folder: 'cartoon_walk_cycle_reference',
@@ -572,7 +556,7 @@ const REF_STYLES_8FRAME = {
     ],
   },
 };
-let refStyle8 = 'williams';
+let refStyle8 = 'human';
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 const PALETTE = [
