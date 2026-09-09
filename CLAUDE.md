@@ -44,7 +44,8 @@
 - Instagram icon links to @walkcycletothepolls
 
 ## Design system
-- **Colors:** Orange `#F2A500`, Black `#111111`, White `#FFFFFF`, Purple `#9B6DCA`
+- **Colors (2026 refresh):** Teal `#4bcadb` (css var `--orange`, kept for back-compat), Teal-dark `#2f5669`, Coral `#ff564b` (css var `--purple`), Yellow `#ffcd00`, Charcoal `#565e62`, Cream `#f0f0f0`, Black `#111111`, White `#FFFFFF`. The var *names* `--orange`/`--purple` are historical — their *values* are teal/coral now. Matches the logo files in `graphics/WCTTP-logo-*.svg`.
+- **Logo:** Use `graphics/WCTTP-logo-STANDARD.svg` for on-white/light placements (nav, hero, og:image) and `graphics/WCTTP-logo-White.svg` for on-black/dark placements (footer). Other variants available: `-Black`, `-MUTED`, `-White-2`. Older `graphics/WCTTP-logo-26-*.svg` and the `01 old versions LOGO` / `02 updated LOGO 2026` folders are superseded — do not reference them in new work.
 - **Font:** Roboto (Google Fonts), weights 400/500/700/900
 - **All CSS variables** defined in `:root` in `css/style.css`
 - Fully responsive, mobile-first with hamburger nav at ≤768px
@@ -63,7 +64,9 @@ GitHub Pages auto-deploys ~1 minute after push. No build step needed — pure HT
 - **Mobile nav black bar (RESOLVED)** — The root cause was `.nav-links` (position:fixed, hidden via `translateY(-110%)`) had its bottom edge sitting inside the nav bar, overlaying the logo and hamburger with a black background. Fixed by parking the closed menu at `top: -100vh` and animating to `top: var(--nav-height)` when opened. All `env(safe-area-inset-top)` and `viewport-fit=cover` approaches were red herrings — do NOT re-add them. The nav HTML uses a `<div class="nav-inner">` wrapper inside `<nav>` for layout; nav is `position: sticky; top: 0`.
 - **Google Form cookie prompt** — Replaced embedded iframe on both `index.html` and `about.html` with a plain link button pointing to the Google Form URL. Do not re-embed the form as an iframe.
 - **Homepage rolling hills** — Removed wavy SVG background from hero section.
-- **Walk cycle tool** — Synced from Game folder; always copy from `/Users/averylawrence/Documents/Stamps/Intro to Animation/Walk Cycle to the Polls Game 2026 - Claude/index.html` to `tool/index.html`. Also copy any new reference image folders. Currently in `tool/`: `walk_cycle_BASIC_reference_Williams/` (8 JPEGs) and `4-frame_walk-cycles/` (4 JPEGs: `4-frame-reference-WALK-CYCLE_01–04.jpg`). GIF files in those folders do NOT need to be copied — tool only loads JPEGs.
+- **Walk cycle tool** — Synced from Game folder; always copy from `/Users/averylawrence/Documents/Stamps/Intro to Animation/WCTTP Website/Walk Cycle to the Polls Game 2026 - Claude/index.html` to `tool/index.html` (note: both folders now live inside the `WCTTP Website` container folder). Also copy any new reference image folders. Currently in `tool/`: `walk_cycle_BASIC_reference_Williams/` (8 JPEGs), `4-frame_walk-cycles/` (4 JPEGs), `cartoon_walk_cycle_reference/` (8 JPEGs), and `human_walk_cycle_reference/` (8 JPEGs). GIF files in those folders do NOT need to be copied — tool only loads JPEGs.
+- **Drawing canvas resolution** — `CANVAS_W`/`CANVAS_H` in `tool/index.html` are 800×800 (bumped from 400×400 in Sept 2026 to match the fixed 800×800 export size — drawing was previously upscaled 2x on export, causing extra pixelation).
+- **Reference style selector (8-frame mode only)** — `REF_STYLES_8FRAME` in `tool/index.html` lets the user pick between `williams` (classic, default), `cartoon`, and `human` reference overlays via a dropdown next to the Ref opacity slider. 4-frame and 1-frame modes are unaffected and still use `REF_CONFIG`.
 
 ## Things still to do / pending decisions
 - **Team/Collaborators section** on About page: removed for now, Avery needs to decide on attribution format before adding back. The full collaborator list is preserved in this file below.

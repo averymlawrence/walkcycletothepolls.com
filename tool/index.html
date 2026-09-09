@@ -10,9 +10,9 @@
 <style>
 /* ── Brand tokens ─────────────────────────────────────────────────────────── */
 :root {
-  --yellow:     #F0A500;
-  --purple:     #A07CC5;
-  --purple-dim: #7A5A9A;
+  --yellow:     #4bcadb;
+  --purple:     #ff564b;
+  --purple-dim: #e0372c;
   --bg:         #111111;
   --panel:      #1A1A1A;
   --border:     #2E2E2E;
@@ -79,7 +79,7 @@ body {
 }
 .tool-btn:hover  { background: #2a2a2a; border-color: #555; }
 .tool-btn:active { background: #222; }
-.tool-btn.active { background: var(--purple); border-color: #C49BE0; color: #fff; }
+.tool-btn.active { background: var(--purple); border-color: #fa8070; color: #fff; }
 .tool-btn.active:hover { background: var(--purple-dim); }
 .tool-btn.undo-redo { font-size: 14px; padding: 4px 9px; }
 .tool-btn.undo-redo:disabled { opacity: 0.3; cursor: default; }
@@ -273,11 +273,16 @@ body {
   <button class="tool-btn undo-redo" id="btnUndo" title="Undo (Ctrl/⌘+Z)" disabled>↩</button>
   <button class="tool-btn undo-redo" id="btnRedo" title="Redo (Ctrl/⌘+Shift+Z)" disabled>↪</button>
   <div class="sep"></div>
-  <input type="color" id="colorPicker" value="#F0A500" title="Color">
+  <input type="color" id="colorPicker" value="#4bcadb" title="Color">
   <input type="number" id="brushSize" value="1" min="1" max="20" title="Brush size" class="desktop-only">
   <div class="sep desktop-only"></div>
   <label class="slider-label desktop-only">Ref:<input type="range" id="refOpacity" min="0" max="100" value="60"></label>
   <button class="tool-btn desktop-only" id="btnToggleRef">Ref On</button>
+  <select id="refStyleSelect" class="desktop-only tool-btn" title="Reference style" style="display:none;">
+    <option value="williams">Classic (Williams)</option>
+    <option value="cartoon">Cartoon</option>
+    <option value="human">Human</option>
+  </select>
   <div class="sep desktop-only"></div>
   <label class="slider-label desktop-only">Onion:<input type="range" id="onionOpacity" min="0" max="60" value="20"></label>
   <button class="tool-btn" id="btnClear" title="Clear current frame">Clear</button>
@@ -399,6 +404,14 @@ body {
       <input type="range" id="refOpacityMobile" min="0" max="100" value="60" style="flex:1;accent-color:var(--purple);">
       <button class="tool-btn" id="btnToggleRefMobile" style="padding:4px 8px;">Ref On</button>
     </div>
+    <div class="panel-row" id="refStyleRowMobile" style="display:none; margin-top:8px;">
+      <span class="panel-label">Style:</span>
+      <select id="refStyleSelectMobile" style="flex:1;background:var(--bg);border:1.5px solid var(--border-mid);color:var(--text);padding:5px;border-radius:4px;">
+        <option value="williams">Classic (Williams)</option>
+        <option value="cartoon">Cartoon</option>
+        <option value="human">Human</option>
+      </select>
+    </div>
   </div>
 
   <div class="panel-section">
@@ -476,8 +489,8 @@ body {
 
 <script>
 // ─── Constants ────────────────────────────────────────────────────────────────
-const CANVAS_W = 400;
-const CANVAS_H = 400;
+const CANVAS_W = 800;
+const CANVAS_H = 800;
 const REF_CACHE_SIZE = 512;
 const MAX_UNDO = 50;
 
@@ -514,9 +527,56 @@ const REF_CONFIG = {
   },
 };
 
+// Selectable reference styles for 8-frame mode
+const REF_STYLES_8FRAME = {
+  williams: {
+    label: 'Classic (Williams)',
+    folder: 'walk_cycle_BASIC_reference_Williams',
+    files: [
+      'walk_cycle_BASIC_reference_Williams.01.jpg',
+      'walk_cycle_BASIC_reference_Williams.02.jpg',
+      'walk_cycle_BASIC_reference_Williams.03.jpg',
+      'walk_cycle_BASIC_reference_Williams.04.jpg',
+      'walk_cycle_BASIC_reference_Williams.05.jpg',
+      'walk_cycle_BASIC_reference_Williams.06.jpg',
+      'walk_cycle_BASIC_reference_Williams.07.jpg',
+      'walk_cycle_BASIC_reference_Williams.08.jpg',
+    ],
+  },
+  cartoon: {
+    label: 'Cartoon',
+    folder: 'cartoon_walk_cycle_reference',
+    files: [
+      '01_Cartoon-CONTACT-Frame_01.jpg',
+      '02_Cartoon-DOWN-Frame_02.jpg',
+      '03_Cartoon-PASSING-Frame_03.jpg',
+      '04_Cartoon-UP-Frame_04.jpg',
+      '05_Cartoon-CONTACT-Frame_05.jpg',
+      '06_Cartoon-DOWN-Frame_06.jpg',
+      '07_Cartoon-PASSING-Frame_07.jpg',
+      '08_Cartoonn-UP-Frame_08.jpg',
+    ],
+  },
+  human: {
+    label: 'Human',
+    folder: 'human_walk_cycle_reference',
+    files: [
+      '01_Human-CONTACT-Frame_01.jpg',
+      '02_Human-DOWN-Frame_02.jpg',
+      '03_Human-PASSING-Frame_03.jpg',
+      '04_Human-UP-Frame_04.jpg',
+      '05_Human-CONTACT-Frame_05.jpg',
+      '06_Human-DOWN-Frame_06.jpg',
+      '07_Human-PASSING-Frame_07.jpg',
+      '08_Human-UP-Frame_08.jpg',
+    ],
+  },
+};
+let refStyle8 = 'williams';
+
 // ─── Palette ──────────────────────────────────────────────────────────────────
 const PALETTE = [
-  '#000000','#ffffff','#F0A500','#A07CC5','#e94560',
+  '#000000','#ffffff','#4bcadb','#ff564b','#e94560',
   '#ff9f43','#feca57','#48dbfb','#1dd1a1','#74b9ff',
   '#fd79a8','#636e72','#b2bec3','#2d3436','#6c5ce7',
   '#00b894','#e17055','#a29bfe','#dfe6e9','#fdcb6e',
@@ -531,7 +591,7 @@ let refLoadedCount = 0;
 
 let currentFrame    = 0;
 let tool            = 'pencil';
-let drawColor       = '#F0A500';
+let drawColor       = '#4bcadb';
 let brushSize       = 1;
 let zoom            = 1;
 let autoZoom        = true;
@@ -699,7 +759,9 @@ function processRefImage(img) {
 }
 
 function loadRefImages() {
-  const cfg = REF_CONFIG[appMode];
+  const cfg = appMode === '8frame'
+    ? { frameCount: 8, folder: REF_STYLES_8FRAME[refStyle8].folder, files: REF_STYLES_8FRAME[refStyle8].files }
+    : REF_CONFIG[appMode];
   refCached = new Array(frameCount).fill(null);
   refLoadedCount = 0;
   const loading = document.getElementById('refLoading');
@@ -1694,6 +1756,14 @@ function startProject(mode) {
   const onionRow = document.getElementById('onionOpacity')?.closest('label');
   if (onionRow) onionRow.style.display = is1 ? 'none' : '';
 
+  const is8 = mode === '8frame';
+  const styleSel = document.getElementById('refStyleSelect');
+  const styleSelMobile = document.getElementById('refStyleSelectMobile');
+  const styleRowMobile = document.getElementById('refStyleRowMobile');
+  if (styleSel) { styleSel.style.display = is8 ? '' : 'none'; styleSel.value = refStyle8; }
+  if (styleSelMobile) styleSelMobile.value = refStyle8;
+  if (styleRowMobile) styleRowMobile.style.display = is8 ? '' : 'none';
+
   buildPalette();
   buildTimeline();
   resizeCanvasArea();
@@ -1701,6 +1771,18 @@ function startProject(mode) {
   updateUndoRedoBtns();
   loadRefImages();
 }
+
+function setRefStyle(style) {
+  if (!REF_STYLES_8FRAME[style] || style === refStyle8) { refStyle8 = style; return; }
+  refStyle8 = style;
+  const sel = document.getElementById('refStyleSelect');
+  const selMobile = document.getElementById('refStyleSelectMobile');
+  if (sel) sel.value = style;
+  if (selMobile) selMobile.value = style;
+  if (appMode === '8frame') loadRefImages();
+}
+document.getElementById('refStyleSelect').addEventListener('change', e => setRefStyle(e.target.value));
+document.getElementById('refStyleSelectMobile').addEventListener('change', e => setRefStyle(e.target.value));
 
 // ─── Startup modal ────────────────────────────────────────────────────────────
 document.getElementById('btn8frame').addEventListener('click', ()=>startProject('8frame'));
