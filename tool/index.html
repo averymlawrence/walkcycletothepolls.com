@@ -782,9 +782,9 @@ function buildTimeline() {
     num.className = 'frame-num'; num.textContent = i + 1;
     wrap.appendChild(num);
     // Linked-frame badge in 4-frame mode
-    if (appMode === '4frame' && i === 2) {
+    if (appMode === '4frame' && i === 3) {
       const badge = document.createElement('span');
-      badge.className = 'frame-link'; badge.textContent = '=1';
+      badge.className = 'frame-link'; badge.textContent = '=2';
       wrap.appendChild(badge);
     }
     wrap.addEventListener('click', () => switchFrame(i));
@@ -867,13 +867,13 @@ function redo() {
   renderCurrentFrame(); renderRef(); updateThumbs(); updateUndoRedoBtns();
 }
 
-// ─── 4-frame sync (frames 0 ↔ 2 always identical) ────────────────────────────
+// ─── 4-frame sync (frames 2 ↔ 4 always identical — the repeated passing pose) ─
 function syncLinkedFrames(idx) {
   if (appMode !== '4frame') return;
-  if (idx === 0) {
-    frames[2] = new ImageData(new Uint8ClampedArray(frames[0].data), CANVAS_W, CANVAS_H);
-  } else if (idx === 2) {
-    frames[0] = new ImageData(new Uint8ClampedArray(frames[2].data), CANVAS_W, CANVAS_H);
+  if (idx === 1) {
+    frames[3] = new ImageData(new Uint8ClampedArray(frames[1].data), CANVAS_W, CANVAS_H);
+  } else if (idx === 3) {
+    frames[1] = new ImageData(new Uint8ClampedArray(frames[3].data), CANVAS_W, CANVAS_H);
   }
 }
 
