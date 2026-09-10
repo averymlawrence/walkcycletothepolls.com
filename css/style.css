@@ -406,7 +406,7 @@ p:last-child { margin-bottom: 0; }
 
 /* ── Hero (home page) ─────────────────────────────────────────────────── */
 .hero {
-  background: var(--orange);
+  background: #83eaf7;
   min-height: calc(100vh - var(--nav-height));
   display: flex;
   flex-direction: column;
