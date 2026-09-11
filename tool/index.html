@@ -274,7 +274,7 @@ body {
   <button class="tool-btn undo-redo" id="btnRedo" title="Redo (Ctrl/⌘+Shift+Z)" disabled>↪</button>
   <div class="sep"></div>
   <input type="color" id="colorPicker" value="#4bcadb" title="Color">
-  <input type="number" id="brushSize" value="1" min="1" max="20" title="Brush size" class="desktop-only">
+  <input type="number" id="brushSize" value="10" min="1" max="20" title="Brush size" class="desktop-only">
   <div class="sep desktop-only"></div>
   <label class="slider-label desktop-only">Ref:<input type="range" id="refOpacity" min="0" max="100" value="60"></label>
   <button class="tool-btn desktop-only" id="btnToggleRef">Ref On</button>
@@ -422,7 +422,7 @@ body {
 
   <div class="panel-section">
     <h4>Brush size</h4>
-    <input type="number" id="brushSizeMobile" value="1" min="1" max="20"
+    <input type="number" id="brushSizeMobile" value="10" min="1" max="20"
       style="width:70px;font-size:14px;background:var(--bg);border:1.5px solid var(--border-mid);color:var(--text);padding:5px;border-radius:4px;text-align:center;">
   </div>
 
@@ -576,7 +576,7 @@ let refLoadedCount = 0;
 let currentFrame    = 0;
 let tool            = 'pencil';
 let drawColor       = '#4bcadb';
-let brushSize       = 1;
+let brushSize       = 10;
 let zoom            = 1;
 let autoZoom        = true;
 let refVisible      = true;
