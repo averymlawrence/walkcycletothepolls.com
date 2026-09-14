@@ -258,7 +258,9 @@ form.addEventListener("submit", (e) => {
         status.innerHTML = "Success!"
       else
         status.innerHTML = "Failed..."
-      return response.json();}
+      form.reset();
+      return response.json();
+      }
       )
     .then((json) => console.log(json))
   }
