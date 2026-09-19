@@ -1072,6 +1072,8 @@ function commitSelection() {
 function deleteSelection() {
   if (!floatCanvas) return;
   clearSelState();
+  renderCurrentFrame(); // the frame data was already cut when the selection was made —
+                         // this just repaints the visible canvas to match it right away
   updateThumbs();
   scheduleAutosave();
 }
