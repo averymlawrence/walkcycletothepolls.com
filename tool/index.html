@@ -284,6 +284,7 @@ body {
   </select>
   <div class="sep desktop-only"></div>
   <label class="slider-label desktop-only">Onion:<input type="range" id="onionOpacity" min="0" max="60" value="20"></label>
+  <label class="slider-label desktop-only" id="onionFramesRow" title="How many frames before/after to show">Frames:<input type="range" id="onionFrames" min="0" max="3" value="1" step="1"></label>
   <button class="tool-btn" id="btnClear" title="Clear current frame">Clear</button>
   <span id="status"></span>
 </div>
@@ -358,10 +359,16 @@ body {
         <button class="tool-btn active" id="btnSelRect">▭ Rect</button>
         <button class="tool-btn"        id="btnSelLasso">⌇ Lasso</button>
       </div>
-      <div style="font-size:9px;color:var(--muted);">Drag handles to scale</div>
+      <button class="tool-btn" id="btnSelWand" style="width:100%;">✨ Magic Wand</button>
+      <div style="font-size:9px;color:var(--muted);">Corner = scale · top handle = rotate · inside = move</div>
       <div style="font-size:9px;color:var(--muted);">Esc = commit &amp; deselect</div>
       <button class="tool-btn" id="btnSelectAll"  style="margin-top:2px;">Select All</button>
       <button class="tool-btn" id="btnDeselect"   style="margin-top:2px;" disabled>Deselect</button>
+      <div class="shape-grid" style="margin-top:4px;">
+        <button class="tool-btn" id="btnSelCopy"  disabled title="Copy selection (Ctrl/⌘+C)">Copy</button>
+        <button class="tool-btn" id="btnSelPaste" disabled title="Paste onto current frame (Ctrl/⌘+V)">Paste</button>
+      </div>
+      <button class="tool-btn" id="btnSelDelete" style="margin-top:2px;" disabled>Delete</button>
       <span   id="selInfo" style="font-size:9px;color:var(--muted);margin-top:2px;">No selection</span>
     </div>
   </div>
@@ -377,6 +384,9 @@ body {
       <input type="number" id="fpsInput" value="8" min="1" max="30">
     </div>
     <div id="exportControls">
+      <button class="export-btn desktop-only" id="btnSaveProject" title="Save your work as a file you can reload later">Save Project</button>
+      <button class="export-btn desktop-only" id="btnLoadProject" title="Load a previously saved project file">Load Project</button>
+      <input type="file" id="fileLoadProject" accept="application/json" style="display:none">
       <button class="export-btn" id="btnExportPng">Export PNG</button>
       <button class="export-btn" id="btnExportGif">Export GIF</button>
     </div>
@@ -412,11 +422,15 @@ body {
     </div>
   </div>
 
-  <div class="panel-section">
+  <div class="panel-section" id="onionSectionMobile">
     <h4>Onion skin</h4>
     <div class="panel-row">
       <span class="panel-label">Opacity:</span>
       <input type="range" id="onionOpacityMobile" min="0" max="60" value="20" style="flex:1;accent-color:var(--purple);">
+    </div>
+    <div class="panel-row" style="margin-top:8px;">
+      <span class="panel-label">Frames:</span>
+      <input type="range" id="onionFramesMobile" min="0" max="3" value="1" step="1" style="flex:1;accent-color:var(--purple);">
     </div>
   </div>
 
@@ -444,15 +458,30 @@ body {
     </div>
   </div>
 
+  <div class="panel-section">
+    <h4>Project</h4>
+    <div style="display:flex;gap:8px;">
+      <button class="tool-btn" id="btnSaveProjectMobile" style="flex:1;padding:8px;" title="Save your work as a file you can reload later">Save</button>
+      <button class="tool-btn" id="btnLoadProjectMobile" style="flex:1;padding:8px;" title="Load a previously saved project file">Load</button>
+    </div>
+  </div>
+
   <!-- Selection options mobile — shown only when select tool active -->
   <div class="panel-section" id="selSectionMobile" style="display:none">
     <h4>Selection type</h4>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">
       <button class="tool-btn active" id="btnSelRect_m">▭ Rect</button>
       <button class="tool-btn"        id="btnSelLasso_m">⌇ Lasso</button>
+      <button class="tool-btn"        id="btnSelWand_m">✨ Wand</button>
     </div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:8px;">Corner = scale · top handle = rotate · inside = move</div>
     <button class="tool-btn" id="btnSelectAll_m"  style="width:100%;padding:8px;margin-bottom:6px;">Select All</button>
-    <button class="tool-btn" id="btnDeselect_m"   style="width:100%;padding:8px;" disabled>Deselect</button>
+    <button class="tool-btn" id="btnDeselect_m"   style="width:100%;padding:8px;margin-bottom:6px;" disabled>Deselect</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+      <button class="tool-btn" id="btnSelCopy_m"  style="padding:8px;" disabled>Copy</button>
+      <button class="tool-btn" id="btnSelPaste_m" style="padding:8px;" disabled>Paste</button>
+    </div>
+    <button class="tool-btn" id="btnSelDelete_m" style="width:100%;padding:8px;" disabled>Delete</button>
   </div>
 
   <!-- Shape options mobile — shown only when shape tool active -->
@@ -491,6 +520,8 @@ const CANVAS_W = 800;
 const CANVAS_H = 800;
 const REF_CACHE_SIZE = 512;
 const MAX_UNDO = 50;
+const AUTOSAVE_KEY = 'wcttp_autosave_v1';
+let autosaveTimer = null;
 
 // ─── Reference config ─────────────────────────────────────────────────────────
 const REF_CONFIG = {
@@ -585,6 +616,7 @@ let onionOpacityVal = 0.20;
 let isDrawing       = false;
 let lastX = -1, lastY = -1;
 let playInterval    = null;
+let onionFrameCount = 1;    // # of frames shown before/after current, each direction (0-3)
 
 // Bop animation (1-frame mode)
 let bopAnimId  = null;
@@ -593,16 +625,20 @@ const BOP_AMPLITUDE = 12 * Math.PI / 180; // ±12°
 const BOP_PERIOD    = 560;                 // ms for one full tilt cycle
 
 // Selection tool state
-let selMode    = 'rect';   // 'rect' | 'lasso'
-let selPhase   = 'idle';   // 'idle' | 'defining' | 'floating' | 'moving' | 'scaling'
+let selMode    = 'rect';   // 'rect' | 'lasso' | 'wand'
+let selPhase   = 'idle';   // 'idle' | 'defining' | 'floating' | 'moving' | 'scaling' | 'rotating'
 let selBounds  = null;     // { x, y, w, h } in frame coords
 let selLassoPath = [];
 let selMask    = null;     // Uint8Array or null (null = full rect)
 let floatCanvas = null;
 let floatX = 0, floatY = 0, floatW = 0, floatH = 0;
-let selHandle  = -1;       // 0-3 corner handle being scaled
-let selAnchor  = null;     // { fx, fy } fixed corner during scale
+let floatRotation = 0;     // radians, applied around the selection's own center
+let selFrame   = null;     // frame index the current floating selection was lifted from
+let selClipboard = null;   // { canvas, w, h, rotation } — set by Copy, consumed by Paste
+let selHandle  = -1;       // 0-3 corner handle being scaled, 4 = rotate handle
+let selAnchor  = null;     // { fx, fy } fixed corner (in LOCAL/unrotated coords) during scale
 let selMovePrev = null;    // { fx, fy } last position during move
+let selRotateStart = null; // { mouseAngle, rot } at start of a rotate drag
 
 // Shape state
 let shapeType        = 'circle';
@@ -673,15 +709,33 @@ function renderCurrentFrame() {
   dc.drawImage(tmp, 0, 0, drawCanvas.width, drawCanvas.height);
 
   oc.clearRect(0, 0, onionCanvas.width, onionCanvas.height);
-  if (onionOpacityVal > 0) {
-    const prev = (currentFrame - 1 + frameCount) % frameCount;
-    const tmp2 = document.createElement('canvas');
-    tmp2.width = CANVAS_W; tmp2.height = CANVAS_H;
-    tmp2.getContext('2d').putImageData(frames[prev], 0, 0);
-    oc.globalAlpha = onionOpacityVal;
-    oc.drawImage(tmp2, 0, 0, onionCanvas.width, onionCanvas.height);
-    oc.globalAlpha = 1;
+  if (onionOpacityVal > 0 && onionFrameCount > 0 && frameCount > 1) {
+    const maxSteps = Math.min(onionFrameCount, frameCount - 1);
+    // Draw furthest-away frames first so the nearest frame ends up on top
+    for (let i = maxSteps; i >= 1; i--) {
+      const falloff = 1 - (i - 1) * 0.28; // nearer frames are more opaque
+      const alpha = Math.max(0.05, onionOpacityVal * falloff);
+      const prevIdx = (currentFrame - i + frameCount * 4) % frameCount;
+      const nextIdx = (currentFrame + i) % frameCount;
+      drawOnionFrame(prevIdx, alpha, 'prev');
+      if (nextIdx !== prevIdx) drawOnionFrame(nextIdx, alpha, 'next');
+    }
   }
+}
+
+// Draws one onion-skin frame, tinted to show which direction it's in
+// ('prev' = yellow/before, 'next' = purple/after).
+function drawOnionFrame(idx, alpha, dir) {
+  const tmp = document.createElement('canvas');
+  tmp.width = CANVAS_W; tmp.height = CANVAS_H;
+  const tctx = tmp.getContext('2d');
+  tctx.putImageData(frames[idx], 0, 0);
+  tctx.globalCompositeOperation = 'source-atop';
+  tctx.fillStyle = dir === 'prev' ? 'rgba(75,202,219,0.55)' : 'rgba(255,86,75,0.55)';
+  tctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+  oc.globalAlpha = alpha;
+  oc.drawImage(tmp, 0, 0, onionCanvas.width, onionCanvas.height);
+  oc.globalAlpha = 1;
 }
 
 function renderRef() {
@@ -793,6 +847,9 @@ function buildTimeline() {
 }
 
 function switchFrame(idx) {
+  // A floating selection always belongs to the frame it was lifted from —
+  // commit it there first so switching frames can never carry it along.
+  if (tool === 'select' && floatCanvas && selPhase !== 'defining') commitSelection();
   currentFrame = idx;
   renderCurrentFrame(); renderRef(); updateThumbs();
 }
@@ -845,6 +902,7 @@ function pushUndo() {
   if (undoStack.length > MAX_UNDO) undoStack.shift();
   redoStack.length = 0;
   updateUndoRedoBtns();
+  scheduleAutosave();
 }
 
 function undo() {
@@ -907,12 +965,38 @@ function stopBop() {
 }
 
 // ─── Selection tool ───────────────────────────────────────────────────────────
+const ROT_HANDLE_OFFSET_PX = 26; // screen px above the top edge
+
+function selCenter() {
+  return { cx: floatX + floatW/2, cy: floatY + floatH/2 };
+}
+
+// Rotate point (px,py) around (cx,cy) by angle (radians), in the SAME coord system.
+function rotateAround(px, py, cx, cy, angle) {
+  const cos = Math.cos(angle), sin = Math.sin(angle);
+  const dx = px - cx, dy = py - cy;
+  return [cx + dx*cos - dy*sin, cy + dx*sin + dy*cos];
+}
+
+// Convert a point from frame coords into the selection's LOCAL (unrotated) space.
+function selToLocal(fx, fy) {
+  const {cx, cy} = selCenter();
+  return rotateAround(fx, fy, cx, cy, -floatRotation);
+}
+
 function selHandlePositions() {
-  // Returns 4 corner positions in CANVAS coordinates (zoomed)
-  if (!selBounds && selPhase !== 'floating' && selPhase !== 'moving' && selPhase !== 'scaling') return [];
-  const x = floatX * zoom, y = floatY * zoom;
-  const w = floatW * zoom, h = floatH * zoom;
-  return [[x,y],[x+w,y],[x+w,y+h],[x,y+h]]; // TL, TR, BR, BL
+  // Returns 5 positions in CANVAS coordinates (zoomed): TL, TR, BR, BL, rotate-handle
+  if (!floatCanvas) return [];
+  const {cx, cy} = selCenter();
+  const corners = [
+    [floatX, floatY], [floatX+floatW, floatY],
+    [floatX+floatW, floatY+floatH], [floatX, floatY+floatH],
+  ];
+  const rotHandleLocal = [cx, floatY - ROT_HANDLE_OFFSET_PX/zoom];
+  return [...corners, rotHandleLocal].map(([px,py]) => {
+    const [rx,ry] = rotateAround(px, py, cx, cy, floatRotation);
+    return [rx*zoom, ry*zoom];
+  });
 }
 
 function hitTestSelHandle(cx, cy) {
@@ -924,7 +1008,8 @@ function hitTestSelHandle(cx, cy) {
 
 function hitTestSelInside(fx, fy) {
   if (!floatCanvas) return false;
-  return fx >= floatX && fx < floatX+floatW && fy >= floatY && fy < floatY+floatH;
+  const [lx,ly] = selToLocal(fx, fy);
+  return lx >= floatX && lx < floatX+floatW && ly >= floatY && ly < floatY+floatH;
 }
 
 function defineSelection() {
@@ -953,38 +1038,99 @@ function defineSelection() {
   }
   fc.putImageData(id, 0, 0);
   floatX=x; floatY=y; floatW=w; floatH=h;
+  floatRotation = 0;
+  selFrame = currentFrame;
 }
 
 function commitSelection() {
   if (!floatCanvas) { clearSelState(); return; }
-  // Paste floating canvas onto frame
+  // Paste the floating canvas back onto the frame it was lifted from —
+  // NOT necessarily the currently-viewed frame, so switching frames mid-edit
+  // can never make a selection land somewhere unexpected.
+  const targetFrame = (selFrame !== null && selFrame !== undefined) ? selFrame : currentFrame;
   const tmp = document.createElement('canvas');
   tmp.width = CANVAS_W; tmp.height = CANVAS_H;
   const tc = tmp.getContext('2d');
-  tc.putImageData(frames[currentFrame], 0, 0);
+  tc.putImageData(frames[targetFrame], 0, 0);
   tc.imageSmoothingEnabled = false;
-  tc.drawImage(floatCanvas, floatX, floatY, floatW, floatH);
-  frames[currentFrame] = tc.getImageData(0, 0, CANVAS_W, CANVAS_H);
-  syncLinkedFrames(currentFrame);
+  const cx = floatX + floatW/2, cy = floatY + floatH/2;
+  tc.save();
+  tc.translate(cx, cy);
+  tc.rotate(floatRotation);
+  tc.drawImage(floatCanvas, -floatW/2, -floatH/2, floatW, floatH);
+  tc.restore();
+  frames[targetFrame] = tc.getImageData(0, 0, CANVAS_W, CANVAS_H);
+  syncLinkedFrames(targetFrame);
   clearSelState();
-  renderCurrentFrame(); updateThumbs();
+  if (targetFrame === currentFrame) renderCurrentFrame();
+  updateThumbs();
+  scheduleAutosave();
+}
+
+// Discards the floating selection WITHOUT pasting it back — the lifted
+// pixels are simply gone (the area was already cut from the frame).
+function deleteSelection() {
+  if (!floatCanvas) return;
+  clearSelState();
+  updateThumbs();
+  scheduleAutosave();
+}
+
+// Stashes a copy of the current floating selection in the clipboard, leaving
+// the floating selection itself untouched and still active.
+function copySelection() {
+  if (!floatCanvas) return;
+  const clone = document.createElement('canvas');
+  clone.width = floatCanvas.width; clone.height = floatCanvas.height;
+  clone.getContext('2d').drawImage(floatCanvas, 0, 0);
+  selClipboard = { canvas: clone, w: floatW, h: floatH, rotation: floatRotation, x: floatX, y: floatY };
+  setStatus('Selection copied — switch frames, then Paste');
+  updateSelUI();
+}
+
+// Pastes the clipboard onto the CURRENT frame, in the same spot it was
+// copied from, as a brand-new floating selection — still movable, scalable
+// and rotatable, exactly like a freshly-made selection.
+function pasteSelection() {
+  if (!selClipboard) return;
+  if (floatCanvas) commitSelection(); // don't lose whatever was already floating
+  pushUndo();
+  const clone = document.createElement('canvas');
+  clone.width = selClipboard.canvas.width; clone.height = selClipboard.canvas.height;
+  clone.getContext('2d').drawImage(selClipboard.canvas, 0, 0);
+  floatCanvas = clone;
+  floatX = selClipboard.x; floatY = selClipboard.y;
+  floatW = selClipboard.w; floatH = selClipboard.h;
+  floatRotation = selClipboard.rotation;
+  selFrame = currentFrame;
+  selPhase = 'floating';
+  drawSelOverlay();
+  setStatus('Pasted — drag to move, corners to scale/rotate');
 }
 
 function clearSelState() {
   selPhase='idle'; selBounds=null; selMask=null; selLassoPath=[];
-  floatCanvas=null; floatX=0; floatY=0; floatW=0; floatH=0;
-  selHandle=-1; selAnchor=null; selMovePrev=null;
+  floatCanvas=null; floatX=0; floatY=0; floatW=0; floatH=0; floatRotation=0;
+  selFrame=null;
+  selHandle=-1; selAnchor=null; selMovePrev=null; selRotateStart=null;
   sc2.clearRect(0, 0, shapeCanvas.width, shapeCanvas.height);
   updateSelUI();
 }
 
 function updateSelUI() {
   const hasFloat = !!floatCanvas;
-  const info = hasFloat ? `${Math.round(floatW)} × ${Math.round(floatH)} px` : 'No selection';
+  const deg = Math.round(floatRotation * 180 / Math.PI);
+  const info = hasFloat
+    ? `${Math.round(floatW)} × ${Math.round(floatH)} px${deg ? ` · ${deg}°` : ''}`
+    : 'No selection';
   const infoEl = document.getElementById('selInfo');
   if (infoEl) infoEl.textContent = info;
-  ['btnDeselect','btnDeselect_m'].forEach(id => {
+  ['btnDeselect','btnDeselect_m','btnSelCopy','btnSelCopy_m','btnSelDelete','btnSelDelete_m'].forEach(id => {
     const b = document.getElementById(id); if (b) b.disabled = !hasFloat;
+  });
+  const hasClip = !!selClipboard;
+  ['btnSelPaste','btnSelPaste_m'].forEach(id => {
+    const b = document.getElementById(id); if (b) b.disabled = !hasClip;
   });
 }
 
@@ -1009,20 +1155,40 @@ function drawSelOverlay() {
     return;
   }
 
-  if (floatCanvas && (selPhase==='floating'||selPhase==='moving'||selPhase==='scaling')) {
-    // Draw floating content
-    sc2.imageSmoothingEnabled = false;
-    sc2.drawImage(floatCanvas, floatX*zoom, floatY*zoom, floatW*zoom, floatH*zoom);
-    // Border
+  if (floatCanvas && (selPhase==='floating'||selPhase==='moving'||selPhase==='scaling'||selPhase==='rotating')) {
+    const {cx, cy} = selCenter();
+    // Draw floating content, rotated around its own center
     sc2.save();
-    sc2.strokeStyle='#555'; sc2.lineWidth=1; sc2.setLineDash([5,4]);
-    sc2.strokeRect(floatX*zoom, floatY*zoom, floatW*zoom, floatH*zoom);
+    sc2.imageSmoothingEnabled = false;
+    sc2.translate(cx*zoom, cy*zoom);
+    sc2.rotate(floatRotation);
+    sc2.drawImage(floatCanvas, -floatW*zoom/2, -floatH*zoom/2, floatW*zoom, floatH*zoom);
     sc2.restore();
-    // Corner handles
+    // Border (rotated)
+    sc2.save();
+    sc2.translate(cx*zoom, cy*zoom);
+    sc2.rotate(floatRotation);
+    sc2.strokeStyle='#555'; sc2.lineWidth=1; sc2.setLineDash([5,4]);
+    sc2.strokeRect(-floatW*zoom/2, -floatH*zoom/2, floatW*zoom, floatH*zoom);
+    sc2.restore();
+    // Corner + rotate handles (already in rotated canvas coords)
     sc2.setLineDash([]);
-    selHandlePositions().forEach(([hx,hy]) => {
-      sc2.fillStyle='#fff'; sc2.strokeStyle='#555'; sc2.lineWidth=1.5;
-      sc2.fillRect(hx-5,hy-5,10,10); sc2.strokeRect(hx-5,hy-5,10,10);
+    const handles = selHandlePositions();
+    handles.forEach(([hx,hy], i) => {
+      const isRotate = i === handles.length - 1;
+      sc2.fillStyle = isRotate ? '#4bcadb' : '#fff';
+      sc2.strokeStyle='#555'; sc2.lineWidth=1.5;
+      if (isRotate) {
+        sc2.beginPath(); sc2.arc(hx,hy,6,0,Math.PI*2); sc2.fill(); sc2.stroke();
+        // connecting line to top-center of the box
+        const topMid = rotateAround(cx, floatY, cx, cy, floatRotation);
+        sc2.beginPath();
+        sc2.moveTo(topMid[0]*zoom, topMid[1]*zoom);
+        sc2.lineTo(hx, hy);
+        sc2.strokeStyle='#4bcadb'; sc2.stroke();
+      } else {
+        sc2.fillRect(hx-5,hy-5,10,10); sc2.strokeRect(hx-5,hy-5,10,10);
+      }
     });
     updateSelUI();
   }
@@ -1045,6 +1211,35 @@ function buildLassoMask(path, bx, by, bw, bh) {
     }
   }
   return mask;
+}
+
+// ─── Magic wand ───────────────────────────────────────────────────────────────
+// Flood-selects all pixels contiguous with (x0,y0) that match its color exactly
+// (mirrors the tolerance-free matching floodFill already uses for Fill).
+function wandSelect(x0, y0) {
+  const id = frames[currentFrame];
+  const target = getPixel(id, x0, y0);
+  if (!target) return null;
+  const visited = new Uint8Array(CANVAS_W * CANVAS_H);
+  const stack = [[x0, y0]];
+  let minX=x0, maxX=x0, minY=y0, maxY=y0;
+  const px_ = [], py_ = [];
+  while (stack.length) {
+    const [cx, cy] = stack.pop();
+    if (cx<0||cy<0||cx>=CANVAS_W||cy>=CANVAS_H) continue;
+    const idx = cy*CANVAS_W+cx;
+    if (visited[idx]) continue;
+    if (!colorsEq(getPixel(id,cx,cy), target)) continue;
+    visited[idx] = 1;
+    px_.push(cx); py_.push(cy);
+    if (cx<minX) minX=cx; if (cx>maxX) maxX=cx;
+    if (cy<minY) minY=cy; if (cy>maxY) maxY=cy;
+    stack.push([cx+1,cy],[cx-1,cy],[cx,cy+1],[cx,cy-1]);
+  }
+  const bw = maxX-minX+1, bh = maxY-minY+1;
+  const mask = new Uint8Array(bw*bh);
+  for (let i=0; i<px_.length; i++) mask[(py_[i]-minY)*bw+(px_[i]-minX)] = 1;
+  return { mask, bx:minX, by:minY, bw, bh };
 }
 
 // ─── Drawing (pencil / eraser / fill) ────────────────────────────────────────
@@ -1119,10 +1314,18 @@ function startDraw(clientX, clientY) {
     const [fx,fy] = canvasXY(clientX, clientY);
     const [cx,cy] = [clientX - drawCanvas.getBoundingClientRect().left,
                      clientY - drawCanvas.getBoundingClientRect().top];
-    if (selPhase === 'floating' || selPhase === 'moving' || selPhase === 'scaling') {
+    if (selPhase === 'floating' || selPhase === 'moving' || selPhase === 'scaling' || selPhase === 'rotating') {
       const h = hitTestSelHandle(cx, cy);
-      if (h >= 0) {
-        // Start scaling from this corner; anchor = opposite corner in frame coords
+      if (h === 4) {
+        // Rotate handle
+        const {cx: ccx, cy: ccy} = selCenter();
+        selRotateStart = { mouseAngle: Math.atan2(fy-ccy, fx-ccx), rot: floatRotation };
+        selPhase = 'rotating';
+        isDrawing = true;
+        return;
+      }
+      if (h >= 0 && h <= 3) {
+        // Start scaling from this corner; anchor = opposite corner in LOCAL (unrotated) coords
         const corners = [[floatX,floatY],[floatX+floatW,floatY],[floatX+floatW,floatY+floatH],[floatX,floatY+floatH]];
         selHandle = h;
         selAnchor = { fx: corners[(h+2)%4][0], fy: corners[(h+2)%4][1] };
@@ -1139,7 +1342,22 @@ function startDraw(clientX, clientY) {
       // Click outside → commit, then start new selection
       commitSelection();
     }
-    // Start new selection
+    if (selMode === 'wand') {
+      pushUndo();
+      const result = wandSelect(fx, fy);
+      if (result && result.bw > 0 && result.bh > 0) {
+        selBounds = { x: result.bx, y: result.by, w: result.bw, h: result.bh };
+        selMask = result.mask;
+        defineSelection();
+        selPhase = 'floating';
+        drawSelOverlay();
+      } else {
+        undoStack.pop(); updateUndoRedoBtns();
+      }
+      isDrawing = false;
+      return;
+    }
+    // Start new selection (rect/lasso)
     pushUndo();
     isDrawing = true;
     selPhase = 'defining';
@@ -1192,11 +1410,19 @@ function continueDraw(clientX, clientY) {
       drawSelOverlay(); return;
     }
     if (selPhase === 'scaling' && selAnchor) {
-      // New bounds: anchor + current cursor define opposite corners
-      const nx = Math.min(selAnchor.fx, fx), ny = Math.min(selAnchor.fy, fy);
-      const nw = Math.max(1, Math.abs(fx - selAnchor.fx));
-      const nh = Math.max(1, Math.abs(fy - selAnchor.fy));
+      // Work in the selection's LOCAL (unrotated) space so scaling a rotated
+      // selection still behaves like dragging a corner of an axis-aligned box.
+      const [lx, ly] = selToLocal(fx, fy);
+      const nx = Math.min(selAnchor.fx, lx), ny = Math.min(selAnchor.fy, ly);
+      const nw = Math.max(1, Math.abs(lx - selAnchor.fx));
+      const nh = Math.max(1, Math.abs(ly - selAnchor.fy));
       floatX=nx; floatY=ny; floatW=nw; floatH=nh;
+      drawSelOverlay(); return;
+    }
+    if (selPhase === 'rotating' && selRotateStart) {
+      const {cx: ccx, cy: ccy} = selCenter();
+      const mouseAngle = Math.atan2(fy-ccy, fx-ccx);
+      floatRotation = selRotateStart.rot + (mouseAngle - selRotateStart.mouseAngle);
       drawSelOverlay(); return;
     }
     return;
@@ -1252,8 +1478,9 @@ function stopDraw() {
           } else { clearSelState(); }
         } else { clearSelState(); }
       }
-    } else if (selPhase==='moving'||selPhase==='scaling') {
+    } else if (selPhase==='moving'||selPhase==='scaling'||selPhase==='rotating') {
       selPhase='floating';
+      selRotateStart=null;
       drawSelOverlay();
     }
     return;
@@ -1458,12 +1685,12 @@ document.getElementById('shapeStrokeWidth_m').addEventListener('input', e=>{
 // ─── Selection mode buttons ───────────────────────────────────────────────────
 function setSelMode(m) {
   selMode = m;
-  ['rect','lasso'].forEach(s => {
+  ['rect','lasso','wand'].forEach(s => {
     document.getElementById('btnSel'+s[0].toUpperCase()+s.slice(1)).classList.toggle('active',s===m);
     document.getElementById('btnSel'+s[0].toUpperCase()+s.slice(1)+'_m').classList.toggle('active',s===m);
   });
 }
-['rect','lasso'].forEach(s => {
+['rect','lasso','wand'].forEach(s => {
   document.getElementById('btnSel'+s[0].toUpperCase()+s.slice(1)).addEventListener('click',()=>setSelMode(s));
   document.getElementById('btnSel'+s[0].toUpperCase()+s.slice(1)+'_m').addEventListener('click',()=>setSelMode(s));
 });
@@ -1480,6 +1707,12 @@ function doDeselect() { commitSelection(); }
   document.getElementById(id).addEventListener('click', doSelectAll));
 ['btnDeselect','btnDeselect_m'].forEach(id =>
   document.getElementById(id).addEventListener('click', doDeselect));
+['btnSelCopy','btnSelCopy_m'].forEach(id =>
+  document.getElementById(id).addEventListener('click', copySelection));
+['btnSelPaste','btnSelPaste_m'].forEach(id =>
+  document.getElementById(id).addEventListener('click', pasteSelection));
+['btnSelDelete','btnSelDelete_m'].forEach(id =>
+  document.getElementById(id).addEventListener('click', deleteSelection));
 
 // ─── Ref & onion ──────────────────────────────────────────────────────────────
 function syncRefToggle() {
@@ -1510,6 +1743,15 @@ function syncOnionSliders(val){
 }
 document.getElementById('onionOpacity'      ).addEventListener('input', e=>syncOnionSliders(+e.target.value));
 document.getElementById('onionOpacityMobile').addEventListener('input', e=>syncOnionSliders(+e.target.value));
+
+function syncOnionFrameSliders(val){
+  onionFrameCount = Math.max(0, Math.min(3, val));
+  document.getElementById('onionFrames').value = onionFrameCount;
+  document.getElementById('onionFramesMobile').value = onionFrameCount;
+  renderCurrentFrame();
+}
+document.getElementById('onionFrames'      ).addEventListener('input', e=>syncOnionFrameSliders(+e.target.value));
+document.getElementById('onionFramesMobile').addEventListener('input', e=>syncOnionFrameSliders(+e.target.value));
 
 // Undo / redo buttons
 ['btnUndo','btnUndo2','btnUndoMobile'].forEach(id=>{
@@ -1554,6 +1796,9 @@ window.addEventListener('keydown', e => {
   if (meta&&!e.shiftKey&&(e.key==='z'||e.key==='Z')){ e.preventDefault(); undo(); return; }
   if ((meta&&e.shiftKey&&(e.key==='z'||e.key==='Z'))||(e.ctrlKey&&(e.key==='y'||e.key==='Y'))){ e.preventDefault(); redo(); return; }
   if (e.key==='Escape') { if (tool==='select') commitSelection(); return; }
+  if (tool==='select' && meta && e.target.tagName!=='INPUT' && (e.key==='c'||e.key==='C')) { e.preventDefault(); copySelection(); return; }
+  if (tool==='select' && meta && e.target.tagName!=='INPUT' && (e.key==='v'||e.key==='V')) { e.preventDefault(); pasteSelection(); return; }
+  if (tool==='select' && e.target.tagName!=='INPUT' && (e.key==='Delete'||e.key==='Backspace') && floatCanvas) { e.preventDefault(); deleteSelection(); return; }
   if (e.target.tagName==='INPUT') return;
   if (e.key==='p'||e.key==='P') setTool('pencil');
   if (e.key==='e'||e.key==='E') setTool('eraser');
@@ -1716,6 +1961,112 @@ function setStatus(msg){
   setTimeout(()=>document.getElementById('status').textContent='',3000);
 }
 
+// ─── Save / Load project ────────────────────────────────────────────────────
+function serializeProject() {
+  const frameData = frames.map(f => {
+    const tmp = document.createElement('canvas');
+    tmp.width = CANVAS_W; tmp.height = CANVAS_H;
+    tmp.getContext('2d').putImageData(f, 0, 0);
+    return tmp.toDataURL('image/png');
+  });
+  return { version: 1, appMode, frameCount, refStyle8, frames: frameData, savedAt: Date.now() };
+}
+
+function autosave() {
+  if (!appMode || !frames.length) return;
+  try { localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(serializeProject())); }
+  catch (e) { /* storage full/unavailable — autosave is best-effort */ }
+}
+
+function scheduleAutosave() {
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(autosave, 800);
+}
+
+function loadFramesFromDataURLs(dataURLs) {
+  return Promise.all(dataURLs.map(du => new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const tmp = document.createElement('canvas');
+      tmp.width = CANVAS_W; tmp.height = CANVAS_H;
+      const tctx = tmp.getContext('2d');
+      tctx.drawImage(img, 0, 0, CANVAS_W, CANVAS_H);
+      resolve(tctx.getImageData(0, 0, CANVAS_W, CANVAS_H));
+    };
+    img.onerror = () => resolve(new ImageData(CANVAS_W, CANVAS_H));
+    img.src = du;
+  })));
+}
+
+async function restoreProject(data) {
+  appMode      = data.appMode;
+  frameCount   = data.frameCount || (data.frames ? data.frames.length : 0);
+  refStyle8    = data.refStyle8 || 'human';
+  frames       = await loadFramesFromDataURLs(data.frames);
+  undoStack.length = 0;
+  redoStack.length = 0;
+  currentFrame = 0;
+  finishProjectSetup();
+}
+
+document.getElementById('btnSaveProject').addEventListener('click', saveProjectFile);
+document.getElementById('btnSaveProjectMobile').addEventListener('click', saveProjectFile);
+function saveProjectFile() {
+  const data = serializeProject();
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `walk_cycle_${appMode}_project.json`; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  setStatus('Project saved!');
+  closePalettePanel();
+}
+
+document.getElementById('btnLoadProject').addEventListener('click', ()=>document.getElementById('fileLoadProject').click());
+document.getElementById('btnLoadProjectMobile').addEventListener('click', ()=>document.getElementById('fileLoadProject').click());
+document.getElementById('fileLoadProject').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  let data;
+  try { data = JSON.parse(await file.text()); }
+  catch (err) { setStatus('Could not read that file'); return; }
+  if (!data || !Array.isArray(data.frames) || !data.frames.length) { setStatus('Not a valid project file'); return; }
+  await restoreProject(data);
+  setStatus('Project loaded!');
+  closePalettePanel();
+});
+
+// Offer to resume an in-browser autosave on load, before the start-mode choice.
+function checkAutosaveOnLoad() {
+  let raw;
+  try { raw = localStorage.getItem(AUTOSAVE_KEY); } catch (e) { raw = null; }
+  if (!raw) return;
+  let data;
+  try { data = JSON.parse(raw); } catch (e) { return; }
+  if (!data || !Array.isArray(data.frames) || !data.frames.length) return;
+
+  const box = document.getElementById('startBox');
+  const firstBtn = box.querySelector('.start-btn');
+  const resumeBtn = document.createElement('button');
+  resumeBtn.className = 'start-btn';
+  resumeBtn.style.cssText = 'border-color:#1dd1a1;color:#1dd1a1;margin-bottom:16px;';
+  const when = new Date(data.savedAt || Date.now()).toLocaleString();
+  resumeBtn.innerHTML = `Resume Previous Work<span class="sub">Auto-saved ${when} — ${data.frameCount} frame${data.frameCount===1?'':'s'}</span>`;
+  resumeBtn.addEventListener('click', async () => {
+    resumeBtn.disabled = true; resumeBtn.querySelector('.sub').textContent = 'Loading…';
+    await restoreProject(data);
+    setStatus('Session restored');
+  });
+  box.insertBefore(resumeBtn, firstBtn);
+  const hr = document.createElement('div');
+  hr.style.cssText = 'height:1px;background:var(--border);margin:0 0 16px;';
+  box.insertBefore(hr, firstBtn);
+}
+checkAutosaveOnLoad();
+window.addEventListener('beforeunload', autosave);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState==='hidden') autosave(); });
+
 // ─── startProject ─────────────────────────────────────────────────────────────
 function startProject(mode) {
   appMode    = mode;
@@ -1724,23 +2075,30 @@ function startProject(mode) {
   undoStack.length = 0;
   redoStack.length = 0;
   currentFrame = 0;
+  finishProjectSetup();
+}
 
+function finishProjectSetup() {
   document.getElementById('startModal').style.display = 'none';
 
   const lbl = document.getElementById('modeLabel');
-  lbl.textContent = mode === '4frame' ? '4-frame' : mode === '1frame' ? '1-drawing' : '8-frame';
+  lbl.textContent = appMode === '4frame' ? '4-frame' : appMode === '1frame' ? '1-drawing' : '8-frame';
   lbl.style.display = '';
 
   // Hide onion skin and copy-prev in 1-frame mode (not applicable)
-  const is1 = mode === '1frame';
+  const is1 = appMode === '1frame';
   ['btnCopyPrev','btnCopyPrevMobile'].forEach(id => {
     const b=document.getElementById(id); if(b) b.style.display = is1 ? 'none' : '';
   });
   document.querySelector('label.slider-label.desktop-only[for]'); // just a ref check
   const onionRow = document.getElementById('onionOpacity')?.closest('label');
   if (onionRow) onionRow.style.display = is1 ? 'none' : '';
+  const onionFramesRow = document.getElementById('onionFramesRow');
+  if (onionFramesRow) onionFramesRow.style.display = is1 ? 'none' : '';
+  const onionSectionMobile = document.getElementById('onionSectionMobile');
+  if (onionSectionMobile) onionSectionMobile.style.display = is1 ? 'none' : '';
 
-  const is8 = mode === '8frame';
+  const is8 = appMode === '8frame';
   const styleSel = document.getElementById('refStyleSelect');
   const styleSelMobile = document.getElementById('refStyleSelectMobile');
   const styleRowMobile = document.getElementById('refStyleRowMobile');
