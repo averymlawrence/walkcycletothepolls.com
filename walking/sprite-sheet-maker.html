@@ -8,49 +8,21 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <meta name="description" content="Make your own walk cycle animation using our online drawing tool — then submit your character to the Walk Cycle to the Polls game.">
+  <meta name="description" content="Turn an 8-frame GIF or PNG sequence into a sprite sheet for the Walk Cycle to the Polls video game.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Make a Walk Cycle — Walk Cycle to the Polls">
-  <meta property="og:description" content="Make your own walk cycle animation using our online drawing tool — then submit your character to the Walk Cycle to the Polls game.">
+  <meta property="og:title" content="Sprite Sheet Maker — Walk Cycle to the Polls">
+  <meta property="og:description" content="Turn an 8-frame GIF or PNG sequence into a sprite sheet for the Walk Cycle to the Polls video game.">
   <meta property="og:image" content="https://www.walkcycletothepolls.com/images/social/og-preview.png">
-  <meta property="og:url" content="https://www.walkcycletothepolls.com/walking/make-a-walk-cycle.html">
+  <meta property="og:url" content="https://www.walkcycletothepolls.com/walking/sprite-sheet-maker.html">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Make a Walk Cycle — Walk Cycle to the Polls">
-  <meta name="twitter:description" content="Make your own walk cycle animation using our online drawing tool — then submit your character to the Walk Cycle to the Polls game.">
+  <meta name="twitter:title" content="Sprite Sheet Maker — Walk Cycle to the Polls">
+  <meta name="twitter:description" content="Turn an 8-frame GIF or PNG sequence into a sprite sheet for the Walk Cycle to the Polls video game.">
   <meta name="twitter:image" content="https://www.walkcycletothepolls.com/images/social/og-preview.png">
-  <title>Make a Walk Cycle — Walk Cycle to the Polls</title>
+  <title>Sprite Sheet Maker — Walk Cycle to the Polls</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css?v=12">
-  <style>
-    .tool-intro {
-      background: var(--orange);
-      padding: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .tool-intro p {
-      margin: 0;
-      font-size: 0.95rem;
-      font-weight: 500;
-      max-width: 600px;
-    }
-    .tool-intro a {
-      color: var(--black);
-      white-space: nowrap;
-    }
-    .tool-embed {
-      width: 100%;
-      height: calc(100vh - var(--nav-height) - 72px);
-      min-height: 560px;
-      border: none;
-      display: block;
-    }
-  </style>
 </head>
 <body>
 
@@ -74,9 +46,9 @@
         <ul class="dropdown" role="list">
           <li><a href="walk-cycles.html">Walk Cycles</a></li>
           <li><a href="history.html">History of Walking</a></li>
-          <li><a href="make-a-walk-cycle.html" class="active">Make a Walk Cycle</a></li>
+          <li><a href="make-a-walk-cycle.html">Make a Walk Cycle</a></li>
           <li><a href="how-to-submit.html">How to Submit</a></li>
-          <li><a href="sprite-sheet-maker.html">Sprite Sheet Maker</a></li>
+          <li><a href="sprite-sheet-maker.html" class="active">Sprite Sheet Maker</a></li>
           <li><a href="upload-walk-cycle.html">Contribute to the Game!</a></li>
         </ul>
       </li>
@@ -90,20 +62,70 @@
     </div>
   </nav>
 
-  <div class="page-wrapper" style="display:flex; flex-direction:column;">
-    <main id="main-content" style="flex:1; display:flex; flex-direction:column;">
+  <div class="page-wrapper">
+    <main id="main-content">
 
-      <div class="tool-intro" role="note">
-        <p>Draw your 8-frame walk cycle below. New to walk cycles? <a href="walk-cycles.html">Read the guide first.</a></p>
-        <a class="btn btn--black" href="../voting.html" style="background:var(--black);color:var(--white); font-size:0.85rem; padding:8px 16px;">Register to Vote &rarr;</a>
-      </div>
+      <header class="page-hero">
+        <div class="container">
+          <span class="eyebrow">Walking</span>
+          <h1>Sprite Sheet Maker</h1>
+          <p class="lead">Turn an 8-frame GIF or 8 PNGs into a sprite sheet for the Walk Cycle to the Polls game.</p>
+        </div>
+      </header>
 
-      <iframe
-        class="tool-embed"
-        src="../tool/index.html"
-        title="Walk Cycle Pixel Art Tool — draw your 8-frame character animation"
-        allowfullscreen
-      ></iframe>
+      <section class="section" aria-labelledby="ssm-heading">
+        <div class="container">
+          <h2 id="ssm-heading" class="visually-hidden">Make your sprite sheet</h2>
+
+          <div class="ssm-rules">
+            <p><strong>Your files need:</strong></p>
+            <ul>
+              <li>Either <strong>one GIF</strong> with 8 frames, <strong>or</strong> <strong>8 PNGs</strong> (one per frame)</li>
+              <li>Every frame exactly <strong>800 &times; 800 px</strong></li>
+              <li>A <strong>transparent background</strong></li>
+            </ul>
+            <p class="note">PNGs are put in order by file name (e.g. <code>walk_01.png</code> &hellip; <code>walk_08.png</code>). Your files never leave your computer &mdash; the sprite sheet is made right here in your browser.</p>
+          </div>
+
+          <label class="ssm-drop" id="ssm-drop" for="ssm-file">
+            <input type="file" id="ssm-file" accept="image/png,image/gif,.png,.gif" multiple class="visually-hidden">
+            <span class="ssm-drop__big">Drop your GIF or PNGs here</span>
+            <span class="ssm-drop__small">or <u>click to choose files</u></span>
+          </label>
+
+          <div id="ssm-messages" class="ssm-messages" role="status" aria-live="polite"></div>
+          <div id="ssm-frames" class="ssm-frames"></div>
+
+          <div class="ssm-actions">
+            <label class="ssm-confirm">
+              <input type="checkbox" id="ssm-confirm">
+              I confirm my GIF/PNGs have transparent backgrounds.
+            </label>
+            <div class="btn-group" style="margin-top:16px;">
+              <button type="button" class="btn btn--black" id="ssm-build" disabled>Make Sprite Sheet</button>
+              <button type="button" class="btn ssm-btn-plain" id="ssm-reset">Start Over</button>
+            </div>
+          </div>
+
+          <div id="ssm-result" class="ssm-result" hidden>
+            <h3>Your sprite sheet is ready</h3>
+            <div class="ssm-result__row">
+              <canvas id="ssm-preview" class="ssm-preview" width="256" height="256" aria-label="Your walk cycle playing at 8 frames per second"></canvas>
+              <div>
+                <p>Here&rsquo;s your walk cycle playing at 8 frames per second, and the 6400&nbsp;&times;&nbsp;800&nbsp;px sprite sheet below.</p>
+                <div class="btn-group" style="margin-top:0;">
+                  <a class="btn btn--black" id="ssm-download" href="#" download>Download Sprite Sheet</a>
+                  <a class="btn btn--orange" href="upload-walk-cycle.html">Next: Upload It to the Game &rarr;</a>
+                </div>
+                <p class="note" style="margin-top:12px;">After downloading, look for the file in your <strong>Downloads</strong> folder.</p>
+              </div>
+            </div>
+            <img id="ssm-sheet" class="ssm-sheet" alt="Your sprite sheet: 8 frames side by side">
+          </div>
+
+          <p class="note" style="margin-top:40px;">Not sure how to export a GIF or PNG sequence? See <a href="how-to-submit.html">How to Submit a Walk Cycle</a>.</p>
+        </div>
+      </section>
 
     </main>
 
@@ -134,5 +156,6 @@
   </div>
 
   <script src="../js/nav.js"></script>
+  <script src="../js/spritesheet-maker.js"></script>
 </body>
 </html>

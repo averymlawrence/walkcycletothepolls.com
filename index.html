@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=10">
+  <link rel="stylesheet" href="css/style.css?v=12">
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Walk Cycle to the Polls">
@@ -52,6 +52,8 @@
           <li><a href="walking/walk-cycles.html">Walk Cycles</a></li>
           <li><a href="walking/history.html">History of Walking</a></li>
           <li><a href="walking/make-a-walk-cycle.html">Make a Walk Cycle</a></li>
+          <li><a href="walking/how-to-submit.html">How to Submit</a></li>
+          <li><a href="walking/sprite-sheet-maker.html">Sprite Sheet Maker</a></li>
           <li><a href="walking/upload-walk-cycle.html">Contribute to the Game!</a></li>
         </ul>
       </li>
@@ -72,11 +74,19 @@
 
       <!-- Hero -->
       <section class="hero" aria-label="Welcome">
-        <img
-          class="hero__logo"
-          src="graphics/WCTTP-logo-STANDARD.svg"
-          alt="Walk Cycle to the Polls logo"
-        >
+        <div class="hero__logo-wrap">
+          <!-- Blinking sun character — pinned to the top-right of the sky on desktop; on phones it hugs the logo's top-right corner. Sits behind the logo where they overlap. -->
+          <picture class="hero__sun" aria-hidden="true">
+            <source srcset="images/sun-character/SUN-v2-static.webp" media="(prefers-reduced-motion: reduce)" type="image/webp">
+            <source srcset="images/sun-character/SUN-v2-BLINKING.webp" type="image/webp">
+            <img src="images/sun-character/SUN-v2-BLINKING-64frames-12fps.gif" alt="" width="512" height="512">
+          </picture>
+          <img
+            class="hero__logo"
+            src="graphics/WCTTP-logo-STANDARD.svg"
+            alt="Walk Cycle to the Polls logo"
+          >
+        </div>
         <p class="hero__tagline">you make a character walk. we put it in a video game. you race to the polls.</p>
         <div class="btn-group" style="justify-content:center; position:relative; z-index:2;">
           <a class="btn btn--black" href="about.html">Learn About the Project</a>
