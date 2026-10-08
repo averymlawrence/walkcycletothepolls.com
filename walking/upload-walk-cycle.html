@@ -156,6 +156,8 @@
         <form id="upload-form" style="display: flex; flex-direction: column; text-align: left;">
           <label for="sprite-sheet">Spritesheet:</label>
           <input type="file" name="sprite-sheet" id="sprite-sheet" accept="image/png" required>
+          <label for="creator">Created By:</label>
+          <input type="text" id="creator" name="creator" placeholder="John Doe">
           <label for="name">Character Name:</label>
           <input type="text" id="name" name="name" placeholder="Walk-man" required>
           <label for="email">Email:</label>
@@ -249,6 +251,7 @@ form.addEventListener("submit", (e) => {
       method: "POST",
       headers: headers,
       body: JSON.stringify({
+        created_by: formData.get("creator"), 
         name: formData.get("name"), 
         email: formData.get("email"), 
         frames: base64String
@@ -261,6 +264,7 @@ form.addEventListener("submit", (e) => {
       else
         status.innerHTML = "Failed..."
       form.reset();
+      sheet_preview.src="..\\images\\Nguyen-Alex-P.3-FINAL.png";
       return response.json();
       }
       )
