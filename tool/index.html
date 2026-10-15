@@ -98,6 +98,15 @@ body {
   display: flex; align-items: center; gap: 4px;
 }
 .slider-label input[type=range] { width: 70px; accent-color: var(--purple); cursor: pointer; }
+.layer-toggle { display: flex; flex-shrink: 0; }
+.layer-toggle .tool-btn { border-radius: 0; }
+.layer-toggle .tool-btn:first-child { border-radius: 4px 0 0 4px; }
+.layer-toggle .tool-btn:last-child  { border-radius: 0 4px 4px 0; border-left: none; }
+.layer-toggle .tool-btn.active { background: var(--yellow); border-color: var(--yellow); color: #111; }
+/* Toolbar copy of the layer switch is for phones (desktop has it in the sidebar) */
+.layer-toggle-tb { display: none; }
+@media (max-width: 767px) { .layer-toggle-tb { display: flex; } }
+.layer-note { font-size: 9px; color: var(--muted); line-height: 1.4; }
 #status { font-size: 10px; color: var(--purple); padding: 2px 4px; white-space: nowrap; flex-shrink: 0; font-weight: 500; }
 
 /* ── Main ─────────────────────────────────────────────────────────────────── */
@@ -118,8 +127,12 @@ body {
 }
 #refCanvas    { position: absolute; top: 0; left: 0; pointer-events: none; image-rendering: auto; }
 #onionCanvas  { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 0; image-rendering: pixelated; }
-#drawCanvas   { position: relative; z-index: 1; image-rendering: pixelated; display: block; }
-#shapeCanvas  { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 2; }
+/* The layer you're NOT drawing on is shown in one of these: Rough sits below the active
+   Clean layer, Clean sits above the active Rough layer. Neither takes pointer events. */
+#layerBelowCanvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1; image-rendering: pixelated; }
+#drawCanvas   { position: relative; z-index: 2; image-rendering: pixelated; display: block; }
+#layerAboveCanvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 3; image-rendering: pixelated; }
+#shapeCanvas  { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 4; }
 #refLoading {
   position: absolute; bottom: 6px; right: 8px; z-index: 10;
   font-size: 10px; color: var(--muted); pointer-events: none;
@@ -269,6 +282,11 @@ body {
   <button class="tool-btn"        id="btnFill"    title="Fill (F)">Fill</button>
   <button class="tool-btn"        id="btnShape"   title="Shape (S)">Shape</button>
   <button class="tool-btn"        id="btnSelect"  title="Select (V)">Select</button>
+  <div class="sep layer-toggle-tb"></div>
+  <div class="layer-toggle layer-toggle-tb" role="group" aria-label="Drawing layer" title="Which layer you're drawing on (L)">
+    <button class="tool-btn" id="btnLayerRough">Rough</button>
+    <button class="tool-btn active" id="btnLayerClean">Clean</button>
+  </div>
   <div class="sep"></div>
   <button class="tool-btn undo-redo" id="btnUndo" title="Undo (Ctrl/⌘+Z)" disabled>↩</button>
   <button class="tool-btn undo-redo" id="btnRedo" title="Redo (Ctrl/⌘+Shift+Z)" disabled>↪</button>
@@ -285,7 +303,7 @@ body {
   <div class="sep desktop-only"></div>
   <label class="slider-label desktop-only">Onion:<input type="range" id="onionOpacity" min="0" max="60" value="20"></label>
   <label class="slider-label desktop-only" id="onionFramesRow" title="How many frames before/after to show">Frames:<input type="range" id="onionFrames" min="0" max="3" value="1" step="1"></label>
-  <button class="tool-btn" id="btnClear" title="Clear current frame">Clear</button>
+  <button class="tool-btn" id="btnClear" title="Clear current frame (on the layer you're drawing on)">Clear</button>
   <span id="status"></span>
 </div>
 
@@ -296,7 +314,9 @@ body {
       <div id="canvasContainer">
         <canvas id="refCanvas"></canvas>
         <canvas id="onionCanvas"></canvas>
+        <canvas id="layerBelowCanvas"></canvas>
         <canvas id="drawCanvas"></canvas>
+        <canvas id="layerAboveCanvas"></canvas>
         <canvas id="shapeCanvas"></canvas>
       </div>
       <span id="refLoading"></span>
@@ -318,6 +338,16 @@ body {
     <label style="font-size:10px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:4px;">
       <input type="checkbox" id="chkAutoZoom" checked> Auto-zoom
     </label>
+    <div class="sdiv"></div>
+
+    <h3>Layers</h3>
+    <div class="layer-toggle" style="width:100%;">
+      <button class="tool-btn" id="btnLayerRough2" style="flex:1;">Rough</button>
+      <button class="tool-btn active" id="btnLayerClean2" style="flex:1;">Clean</button>
+    </div>
+    <label class="check-row"><input type="checkbox" id="chkRoughVisible" checked> Show rough</label>
+    <label class="slider-label">Rough:<input type="range" id="roughOpacity" min="10" max="100" value="40"></label>
+    <div class="layer-note">Sketch on Rough, trace on Clean. Export uses the Clean layer.</div>
     <div class="sdiv"></div>
 
     <button class="tool-btn" id="btnCopyPrev">Copy Prev Frame</button>
@@ -404,6 +434,21 @@ body {
   <div class="panel-section">
     <h4>Colors</h4>
     <div id="mobilePalette"></div>
+  </div>
+
+  <div class="panel-section">
+    <h4>Layers</h4>
+    <div class="panel-row">
+      <div class="layer-toggle" style="flex:1;">
+        <button class="tool-btn" id="btnLayerRoughMobile" style="flex:1;padding:8px;">Rough</button>
+        <button class="tool-btn active" id="btnLayerCleanMobile" style="flex:1;padding:8px;">Clean</button>
+      </div>
+    </div>
+    <div class="panel-row" style="margin-top:8px;">
+      <label class="panel-label" style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="chkRoughVisibleMobile" checked> Show rough</label>
+      <input type="range" id="roughOpacityMobile" min="10" max="100" value="40" style="flex:1;accent-color:var(--purple);">
+    </div>
+    <div class="layer-note" style="margin-top:6px;font-size:11px;">Sketch on Rough, trace on Clean. Export uses the Clean layer.</div>
   </div>
 
   <div class="panel-section">
@@ -600,7 +645,13 @@ const PALETTE = [
 // ─── Runtime state ────────────────────────────────────────────────────────────
 let appMode     = null;   // '8frame' | '4frame' | '1frame'
 let frameCount  = 0;
-let frames      = [];
+// Two drawing layers per frame. `frames` always points at the ACTIVE layer's array,
+// so every tool (pencil, fill, shape, select, copy-prev, clear, undo) edits that layer.
+let layers      = { rough: [], clean: [] };
+let activeLayer = 'clean';
+let frames      = layers.clean;
+let roughVisible    = true;
+let roughOpacityVal = 0.40;  // rough is dimmed while you work on Clean so tracing is easy
 let refCached   = [];
 let refLoadedCount = 0;
 
@@ -664,6 +715,10 @@ const dc  = drawCanvas .getContext('2d', { willReadFrequently: true });
 const rc  = refCanvas  .getContext('2d');
 const oc  = onionCanvas.getContext('2d');
 const sc2 = shapeCanvas.getContext('2d');
+const layerBelowCanvas = document.getElementById('layerBelowCanvas');
+const layerAboveCanvas = document.getElementById('layerAboveCanvas');
+const lbc = layerBelowCanvas.getContext('2d');
+const lac = layerAboveCanvas.getContext('2d');
 
 // ─── Canvas sizing ────────────────────────────────────────────────────────────
 function resizeCanvasArea() {
@@ -689,7 +744,7 @@ function updateZoomLabel() {
 }
 
 function initCanvases() {
-  [drawCanvas, refCanvas, onionCanvas, shapeCanvas].forEach(c => {
+  [drawCanvas, refCanvas, onionCanvas, shapeCanvas, layerBelowCanvas, layerAboveCanvas].forEach(c => {
     c.width  = Math.round(CANVAS_W * zoom);
     c.height = Math.round(CANVAS_H * zoom);
   });
@@ -698,15 +753,52 @@ function initCanvases() {
   rc.imageSmoothingQuality  = 'high';
   oc.imageSmoothingEnabled  = false;
   sc2.imageSmoothingEnabled = false;
+  lbc.imageSmoothingEnabled = false;
+  lac.imageSmoothingEnabled = false;
 }
 
 // ─── Rendering ────────────────────────────────────────────────────────────────
-function renderCurrentFrame() {
-  dc.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+function imageDataToCanvas(id) {
   const tmp = document.createElement('canvas');
   tmp.width = CANVAS_W; tmp.height = CANVAS_H;
-  tmp.getContext('2d').putImageData(frames[currentFrame], 0, 0);
-  dc.drawImage(tmp, 0, 0, drawCanvas.width, drawCanvas.height);
+  tmp.getContext('2d').putImageData(id, 0, 0);
+  return tmp;
+}
+
+// Both layers of frame i flattened into one 800×800 canvas (rough dimmed, under clean).
+function compositeFrame(i) {
+  const out = document.createElement('canvas');
+  out.width = CANVAS_W; out.height = CANVAS_H;
+  const ctx = out.getContext('2d');
+  if (roughVisible && layers.rough[i]) {
+    ctx.globalAlpha = activeLayer === 'rough' ? 1 : roughOpacityVal;
+    ctx.drawImage(imageDataToCanvas(layers.rough[i]), 0, 0);
+    ctx.globalAlpha = 1;
+  }
+  if (layers.clean[i]) ctx.drawImage(imageDataToCanvas(layers.clean[i]), 0, 0);
+  return out;
+}
+
+// Shows the layer you're NOT drawing on: Rough (dimmed) below an active Clean layer,
+// or Clean above an active Rough layer.
+function renderOtherLayer() {
+  lbc.clearRect(0, 0, layerBelowCanvas.width, layerBelowCanvas.height);
+  lac.clearRect(0, 0, layerAboveCanvas.width, layerAboveCanvas.height);
+  if (!frameCount) return;
+  if (activeLayer === 'clean') {
+    if (!roughVisible) return;
+    lbc.globalAlpha = roughOpacityVal;
+    lbc.drawImage(imageDataToCanvas(layers.rough[currentFrame]), 0, 0, layerBelowCanvas.width, layerBelowCanvas.height);
+    lbc.globalAlpha = 1;
+  } else {
+    lac.drawImage(imageDataToCanvas(layers.clean[currentFrame]), 0, 0, layerAboveCanvas.width, layerAboveCanvas.height);
+  }
+}
+
+function renderCurrentFrame() {
+  dc.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+  dc.drawImage(imageDataToCanvas(frames[currentFrame]), 0, 0, drawCanvas.width, drawCanvas.height);
+  renderOtherLayer();
 
   oc.clearRect(0, 0, onionCanvas.width, onionCanvas.height);
   if (onionOpacityVal > 0 && onionFrameCount > 0 && frameCount > 1) {
@@ -753,11 +845,8 @@ function thumbSize() { return window.innerWidth < 600 ? 36 : 48; }
 function updateThumbs() {
   document.querySelectorAll('.frame-thumb canvas').forEach((tc, i) => {
     const ctx = tc.getContext('2d');
-    const tmp = document.createElement('canvas');
-    tmp.width = CANVAS_W; tmp.height = CANVAS_H;
-    tmp.getContext('2d').putImageData(frames[i], 0, 0);
     ctx.clearRect(0, 0, tc.width, tc.height);
-    ctx.drawImage(tmp, 0, 0, tc.width, tc.height);
+    ctx.drawImage(compositeFrame(i), 0, 0, tc.width, tc.height);
   });
   document.querySelectorAll('.frame-thumb').forEach((el, i) =>
     el.classList.toggle('active', i === currentFrame));
@@ -897,6 +986,7 @@ function updateUndoRedoBtns() {
 function pushUndo() {
   undoStack.push({
     frameIndex: currentFrame,
+    layer: activeLayer,
     data: new Uint8ClampedArray(frames[currentFrame].data),
   });
   if (undoStack.length > MAX_UNDO) undoStack.shift();
@@ -908,7 +998,8 @@ function pushUndo() {
 function undo() {
   if (!undoStack.length) return;
   const entry = undoStack.pop();
-  redoStack.push({ frameIndex: entry.frameIndex, data: new Uint8ClampedArray(frames[entry.frameIndex].data) });
+  if (entry.layer && entry.layer !== activeLayer) setActiveLayer(entry.layer); // jump to the layer being undone
+  redoStack.push({ frameIndex: entry.frameIndex, layer: activeLayer, data: new Uint8ClampedArray(frames[entry.frameIndex].data) });
   currentFrame = entry.frameIndex;
   frames[entry.frameIndex] = new ImageData(entry.data, CANVAS_W, CANVAS_H);
   syncLinkedFrames(entry.frameIndex);
@@ -918,7 +1009,8 @@ function undo() {
 function redo() {
   if (!redoStack.length) return;
   const entry = redoStack.pop();
-  undoStack.push({ frameIndex: entry.frameIndex, data: new Uint8ClampedArray(frames[entry.frameIndex].data) });
+  if (entry.layer && entry.layer !== activeLayer) setActiveLayer(entry.layer);
+  undoStack.push({ frameIndex: entry.frameIndex, layer: activeLayer, data: new Uint8ClampedArray(frames[entry.frameIndex].data) });
   currentFrame = entry.frameIndex;
   frames[entry.frameIndex] = new ImageData(entry.data, CANVAS_W, CANVAS_H);
   syncLinkedFrames(entry.frameIndex);
@@ -942,9 +1034,9 @@ function startBop() {
   function tick(t) {
     if (!bopAnimId) return;
     const angle = Math.sin((t - bopStart) / BOP_PERIOD * Math.PI * 2) * BOP_AMPLITUDE;
-    const tmp = document.createElement('canvas');
-    tmp.width = CANVAS_W; tmp.height = CANVAS_H;
-    tmp.getContext('2d').putImageData(frames[0], 0, 0);
+    const tmp = compositeFrame(0);
+    lbc.clearRect(0, 0, layerBelowCanvas.width, layerBelowCanvas.height);
+    lac.clearRect(0, 0, layerAboveCanvas.width, layerAboveCanvas.height);
     dc.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
     dc.save();
     const pw = drawCanvas.width / 2, ph = drawCanvas.height; // bottom-center pivot
@@ -1593,6 +1685,59 @@ function commitShape() {
   }
 }
 
+// ─── Layers ───────────────────────────────────────────────────────────────────
+function setActiveLayer(name) {
+  if (!layers[name]) return;
+  // A floating selection belongs to the layer it was lifted from — drop it back there first.
+  if (tool === 'select' && floatCanvas && selPhase !== 'defining') commitSelection();
+  activeLayer = name;
+  frames = layers[name];
+  if (name === 'rough' && !roughVisible) setRoughVisible(true); // never draw on a hidden layer
+  ['btnLayerRough','btnLayerRough2','btnLayerRoughMobile'].forEach(id =>
+    document.getElementById(id).classList.toggle('active', name === 'rough'));
+  ['btnLayerClean','btnLayerClean2','btnLayerCleanMobile'].forEach(id =>
+    document.getElementById(id).classList.toggle('active', name === 'clean'));
+  if (appMode) { renderCurrentFrame(); updateThumbs(); }
+}
+
+function setRoughVisible(v) {
+  roughVisible = v;
+  document.getElementById('chkRoughVisible').checked = v;
+  document.getElementById('chkRoughVisibleMobile').checked = v;
+  if (!v && activeLayer === 'rough') setActiveLayer('clean');
+  if (appMode) { renderCurrentFrame(); updateThumbs(); }
+}
+
+function syncRoughOpacity(val) {
+  roughOpacityVal = val / 100;
+  document.getElementById('roughOpacity').value = val;
+  document.getElementById('roughOpacityMobile').value = val;
+  if (appMode) { renderCurrentFrame(); updateThumbs(); }
+}
+
+['btnLayerRough','btnLayerRough2','btnLayerRoughMobile'].forEach(id =>
+  document.getElementById(id).addEventListener('click', () => setActiveLayer('rough')));
+['btnLayerClean','btnLayerClean2','btnLayerCleanMobile'].forEach(id =>
+  document.getElementById(id).addEventListener('click', () => setActiveLayer('clean')));
+['chkRoughVisible','chkRoughVisibleMobile'].forEach(id =>
+  document.getElementById(id).addEventListener('change', e => setRoughVisible(e.target.checked)));
+['roughOpacity','roughOpacityMobile'].forEach(id =>
+  document.getElementById(id).addEventListener('input', e => syncRoughOpacity(+e.target.value)));
+
+function layerIsEmpty(arr) {
+  return arr.every(f => { for (let i = 3; i < f.data.length; i += 4) if (f.data[i]) return false; return true; });
+}
+
+// What gets exported: the Clean layer. If someone only ever drew on Rough, export that
+// instead of an empty file.
+function exportFrames() {
+  if (layerIsEmpty(layers.clean) && !layerIsEmpty(layers.rough)) {
+    setStatus('Clean layer is empty — exported the Rough layer');
+    return layers.rough;
+  }
+  return layers.clean;
+}
+
 // ─── Tool buttons ─────────────────────────────────────────────────────────────
 function setTool(t) {
   // Commit any active selection when switching tools
@@ -1807,6 +1952,7 @@ window.addEventListener('keydown', e => {
   if (e.key==='f'||e.key==='F') setTool('fill');
   if (e.key==='s'||e.key==='S') setTool('shape');
   if (e.key==='v'||e.key==='V') setTool('select');
+  if (e.key==='l'||e.key==='L') setActiveLayer(activeLayer==='clean' ? 'rough' : 'clean');
   if (e.key==='[') applyZoom(zoom-0.5,true);
   if (e.key===']') applyZoom(zoom+0.5,true);
   if (e.key==='ArrowRight') switchFrame((currentFrame+1)%frameCount);
@@ -1854,7 +2000,7 @@ document.getElementById('btnExportPng').addEventListener('click', ()=>{
   const sctx=sheet.getContext('2d');
   sctx.clearRect(0,0,sheet.width,sheet.height);
   sctx.imageSmoothingEnabled=false;
-  frames.forEach((frame,i)=>{
+  exportFrames().forEach((frame,i)=>{
     const tmp=document.createElement('canvas'); tmp.width=CANVAS_W; tmp.height=CANVAS_H;
     tmp.getContext('2d').putImageData(frame,0,0);
     sctx.drawImage(tmp,i*FRAME_PX,0,FRAME_PX,FRAME_PX);
@@ -1871,6 +2017,7 @@ document.getElementById('btnExportGif').addEventListener('click', ()=>{
   const delay=Math.round(100/fps);
   const W=800, H=800;
   setStatus('Encoding GIF…');
+  const frames=exportFrames(); // shadows the active-layer `frames` for the rest of this export
 
   const allColors=new Set(['0,0,0']);
   frames.forEach(frame=>{
@@ -1965,13 +2112,12 @@ function setStatus(msg){
 
 // ─── Save / Load project ────────────────────────────────────────────────────
 function serializeProject() {
-  const frameData = frames.map(f => {
-    const tmp = document.createElement('canvas');
-    tmp.width = CANVAS_W; tmp.height = CANVAS_H;
-    tmp.getContext('2d').putImageData(f, 0, 0);
-    return tmp.toDataURL('image/png');
-  });
-  return { version: 1, appMode, frameCount, refStyle8, frames: frameData, savedAt: Date.now() };
+  const toURLs = arr => arr.map(f => imageDataToCanvas(f).toDataURL('image/png'));
+  // `frames` = Clean layer (same key as version-1 files, so older copies of the tool still open it)
+  return { version: 2, appMode, frameCount, refStyle8,
+           frames: toURLs(layers.clean), roughFrames: toURLs(layers.rough),
+           activeLayer, roughVisible, roughOpacity: Math.round(roughOpacityVal * 100),
+           savedAt: Date.now() };
 }
 
 function autosave() {
@@ -2004,7 +2150,16 @@ async function restoreProject(data) {
   appMode      = data.appMode;
   frameCount   = data.frameCount || (data.frames ? data.frames.length : 0);
   refStyle8    = data.refStyle8 || 'human';
-  frames       = await loadFramesFromDataURLs(data.frames);
+  const clean  = await loadFramesFromDataURLs(data.frames);
+  const rough  = Array.isArray(data.roughFrames) && data.roughFrames.length === clean.length
+    ? await loadFramesFromDataURLs(data.roughFrames)
+    : clean.map(() => new ImageData(CANVAS_W, CANVAS_H)); // version-1 files had no rough layer
+  layers = { rough, clean };
+  currentFrame = 0;
+  activeLayer = 'clean'; frames = layers.clean; // point at the new layers before anything re-renders
+  if (typeof data.roughOpacity === 'number') syncRoughOpacity(data.roughOpacity);
+  setRoughVisible(data.roughVisible !== false);
+  setActiveLayer(data.activeLayer === 'rough' ? 'rough' : 'clean');
   undoStack.length = 0;
   redoStack.length = 0;
   currentFrame = 0;
@@ -2073,7 +2228,9 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 function startProject(mode) {
   appMode    = mode;
   frameCount = REF_CONFIG[mode].frameCount;
-  frames     = Array.from({ length: frameCount }, ()=>new ImageData(CANVAS_W, CANVAS_H));
+  const blank = () => Array.from({ length: frameCount }, ()=>new ImageData(CANVAS_W, CANVAS_H));
+  layers = { rough: blank(), clean: blank() };
+  setActiveLayer('clean');
   undoStack.length = 0;
   redoStack.length = 0;
   currentFrame = 0;
