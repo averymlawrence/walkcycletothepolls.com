@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#ff564b">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="description" content="Play the Walk Cycle to the Polls video game in your browser and race community-made characters to the polls.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Play the Game — Walk Cycle to the Polls">
+  <meta property="og:description" content="Play the Walk Cycle to the Polls video game in your browser.">
+  <meta property="og:image" content="https://www.walkcycletothepolls.com/images/social/og-preview.png">
+  <meta property="og:url" content="https://www.walkcycletothepolls.com/play.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Play the Game — Walk Cycle to the Polls">
+  <meta name="twitter:description" content="Play the Walk Cycle to the Polls video game in your browser.">
+  <meta name="twitter:image" content="https://www.walkcycletothepolls.com/images/social/og-preview.png">
+  <title>Play the Game — Walk Cycle to the Polls</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=14">
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <nav aria-label="Main navigation">
+    <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="Walk Cycle to the Polls — home">
+      <img src="graphics/WCTTP-logo-STANDARD.svg" alt="Walk Cycle to the Polls logo">
+      <span class="nav-logo-text">Walk Cycle<br>to the Polls</span>
+    </a>
+    <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">☰</button>
+    <ul class="nav-links" id="nav-links" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="events.html">Events</a></li>
+      <li>
+        <button class="nav-parent" aria-expanded="false" aria-haspopup="true">
+          Walking <span class="nav-arrow" aria-hidden="true">▾</span>
+        </button>
+        <ul class="dropdown" role="list">
+          <li><a href="walking/walk-cycles.html">Walk Cycles</a></li>
+          <li><a href="walking/history.html">History of Walking</a></li>
+          <li><a href="walking/make-a-walk-cycle.html">Make a Walk Cycle</a></li>
+          <li><a href="walking/how-to-submit.html">How to Submit</a></li>
+          <li><a href="walking/sprite-sheet-maker.html">Sprite Sheet Maker</a></li>
+          <li><a href="walking/upload-walk-cycle.html">Contribute to the Game!</a></li>
+        </ul>
+      </li>
+      <li><a href="characters.html">Characters</a></li>
+      <li><a href="play.html" class="active">Play</a></li>
+      <li><a href="voting.html">Voting</a></li>
+      <li>
+        <a class="nav-instagram" href="https://www.instagram.com/walkcycletothepolls" target="_blank" rel="noopener noreferrer" aria-label="Walk Cycle to the Polls on Instagram">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        </a>
+      </li>
+    </ul>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <main id="main-content">
+
+      <header class="page-hero">
+        <div class="container">
+          <span class="eyebrow">The Video Game</span>
+          <h1>Play the Game</h1>
+          <p class="lead">Pick a character drawn by someone in our community and race it to the polls &mdash; right here in your browser.</p>
+        </div>
+      </header>
+
+      <section class="section" aria-label="Walk Cycle to the Polls game">
+        <div class="container">
+<iframe frameborder="0" src="https://itch.io/embed-upload/20065701?color=d7cbcb" allowfullscreen="" width="960" height="620"><a href="https://thesevensages.itch.io/walk-cycle-to-the-polls">Play Walk Cycle to the Polls on itch.io</a></iframe>
+          <p class="game-embed__note">Game not loading? <a href="https://thesevensages.itch.io/walk-cycle-to-the-polls" target="_blank" rel="noopener noreferrer">Play Walk Cycle to the Polls on itch.io</a>.</p>
+        </div>
+      </section>
+
+    </main>
+    <footer>
+      <div class="footer-inner">
+        <div>
+          <div class="footer-logo">
+            <img src="graphics/WCTTP-logo-White.svg" alt="Walk Cycle to the Polls">
+          </div>
+          <div class="footer-copy">
+            <p>An interdisciplinary civic art initiative at the<br>
+            <a href="https://stamps.umich.edu" target="_blank" rel="noopener noreferrer">Stamps School of Art &amp; Design</a>,
+            University of Michigan.</p>
+            <p class="mt-8">Project Lead: Avery Lawrence</p>
+          </div>
+        </div>
+        <div class="footer-social">
+          <a href="https://www.instagram.com/walkcycletothepolls" target="_blank" rel="noopener noreferrer" aria-label="Walk Cycle to the Polls on Instagram">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            @walkcycletothepolls
+          </a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Walk Cycle to the Polls. University of Michigan Stamps School of Art &amp; Design.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="js/nav.js"></script>
+</body>
+</html>
