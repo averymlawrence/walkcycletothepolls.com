@@ -1086,3 +1086,22 @@ footer {
   color: var(--gray);
 }
 .carousel__count { font-weight: 700; color: var(--black); white-space: nowrap; }
+
+/* ── Characters page search ───────────────────────────────────────────── */
+.char-search { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 32px; }
+.char-search__label { font-weight: 700; flex-basis: 100%; }
+.char-search__input {
+  flex: 1 1 280px;
+  max-width: 460px;
+  font: inherit;
+  font-size: 1.05rem;
+  padding: 12px 16px;
+  border: 3px solid var(--teal-dark);
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--black);
+}
+.char-search__input:focus-visible { outline: 3px solid var(--black); outline-offset: 2px; }
+.char-search__status { margin: 0; font-weight: 700; }
+.char-search__empty { font-weight: 500; margin-bottom: 24px; }
+.char-card[hidden] { display: none; }
