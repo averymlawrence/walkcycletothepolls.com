@@ -31,7 +31,7 @@ FRAME_PX = 400
 FPS = {8: 8, 4: 6}            # 4-frame walk cycles play a little slower
 UNTITLED_2024 = 'untitled 2024'  # shown on the card as "2024 edition"
 # Display-name fixes for names that can't be typed the same way in a folder name
-ARTIST_NAMES = {'Now What!': 'Now What?!'}
+ARTIST_NAMES = {'Now What!': 'Now What?!', 'Lisa Kamaiopoili': 'Lisa Kamaiopili'}
 
 
 def slug(text):
@@ -50,6 +50,7 @@ def collect(src):
             print(f'  skipped (no *_spritesheet.png): {name}')
             continue
         artist, character = (part.strip() for part in name.split(' - ', 1))
+        artist = ARTIST_NAMES.get(artist, artist)  # fix spellings before naming the WebP too
         sheet = os.path.join(folder, sheets[0])
         w, h = map(int, subprocess.check_output(
             ['magick', 'identify', '-format', '%w %h', sheet]).split())

@@ -3,3 +3,6 @@
 images/WCTTP_Characters_*/
 # Old hand-made Characters sprites, replaced by images/characters/ (kept locally only)
 images/characters-page-webp-files/
+# Raw event photos/videos (camera RAW, HEIC, full-size video). The site uses the
+# edited, web-sized copies in images/events/recaps/.
+images/events/WCTTP */
