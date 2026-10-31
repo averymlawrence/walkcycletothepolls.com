@@ -94,7 +94,7 @@ GitHub Pages auto-deploys ~1 minute after push. No build step needed — pure HT
 
 ## Things still to do / pending decisions
 - **`verification.html`** — Root-level page (added by Jacob Robinson, commit `0b0e641`) with a username/password form that submits to `https://dfiv0rwmt3.execute-api.us-east-1.amazonaws.com/Default/verification/site` (same API host as the `/Default/characters` endpoint used by `walking/upload-walk-cycle.html`). Confirmed intentional as of Sept 2026 — Avery says Jacob is using it as part of building the Walk Cycle to the Polls game backend. It's a WIP/unstyled page and not linked from the site nav, so it's not something a visitor would stumble into. Do not remove or "fix" this without checking with Avery/Jacob first.
-- **Team/Collaborators section** on About page: removed for now, Avery needs to decide on attribution format before adding back. The full collaborator list is preserved in this file below.
+- **2026 Team section** on About page (added Oct 2026, `.credit-grid` / `.credit-group`): Game Development, Music & Sound Effects, Marketing, Project Coordinators, 2026 Music Video. Names link to the URLs Avery supplied; Drea Ramirez Leon has no link yet. The older full collaborator list below is historical — don't merge it in without asking.
 - **Homepage animation:** Cal Fuqua's GIF is live. More student walk cycle GIFs can be added to `images/` and wired into the homepage hero strip.
 - **Walk cycle tool submission flow:** Currently the tool lets users draw and export — future work is connecting it to a sprite database for game integration (Phase 1 EECS work).
 
