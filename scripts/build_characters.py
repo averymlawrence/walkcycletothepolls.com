@@ -13,11 +13,14 @@ For each character this:
      (skipped if the WebP is already newer than the source), and
   2. rewrites the card grid in characters.html between the
      <!-- CHARACTERS:START --> / <!-- CHARACTERS:END --> markers,
-     along with the character count in the intro text.
+     along with the character count in the intro text, and
+  3. writes images/characters/characters.json, which the home-page
+     character parade picks random walkers from.
 
 Needs ImageMagick (`magick`) on the PATH.
 """
 import html
+import json
 import os
 import re
 import subprocess
@@ -106,7 +109,12 @@ def main():
     page = re.sub(r'(<span class="char-count">)\d+(</span>)', rf'\g<1>{len(chars)}\g<2>', page)
     open(PAGE, 'w', encoding='utf-8').write(page)
 
-    stale = sorted(set(os.listdir(OUT_DIR)) - files - {'.DS_Store'})
+    # Manifest for the home-page character parade (picks random characters from it)
+    manifest = [{'file': c['file'], 'frames': c['frames']} for c in chars]
+    with open(os.path.join(OUT_DIR, 'characters.json'), 'w', encoding='utf-8') as f:
+        json.dump(manifest, f, separators=(',', ':'))
+
+    stale = sorted(set(os.listdir(OUT_DIR)) - files - {'.DS_Store', 'characters.json'})
     print(f'{len(chars)} characters on the page, {converted} sprite sheets converted.')
     if stale:
         print('WebPs no longer used by the page (safe to delete):', *stale, sep='\n  ')

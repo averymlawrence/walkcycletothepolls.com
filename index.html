@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=17">
+  <link rel="stylesheet" href="css/style.css?v=19">
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Walk Cycle to the Polls">
@@ -98,65 +98,75 @@
           <a class="btn btn--purple" href="play.html">Play the Game</a>
         </div>
 
-        <!-- Walking character parade — student walk cycles, Stamps School of Art & Design, U-M -->
+        <!-- "To the Polls" sign, planted in the ground behind the parade -->
+        <img class="hero__sign" src="graphics/WCTTP-to-the-polls-sign.webp" alt="" aria-hidden="true" width="700" height="704">
+
+        <!-- Walking character parade — random characters from the game (images/characters/characters.json,
+             written by scripts/build_characters.py). Each walker becomes a new character every time it exits. -->
         <div class="hero__character-strip" aria-hidden="true" id="parade-strip"></div>
 
         <script>
           (function() {
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-            var paradeGifs = [
-              'images/Fuqua-Cal-WALK.2-transparent.gif',
-              'images/Biebel-Grace-P.3-FINAL.gif',
-              'images/Gasser-Elisa-P.3-FINAL.gif',
-              'images/Glynn-Olivia-P.3-FINAL.gif',
-              'images/Hoppe-Jane-P.3-FINAL.gif',
-              'images/Moreno-Ivan-P.3-FINAL.gif',
-              'images/Muqit-Shafiq-P.3-FINAL.gif',
-              'images/Nguyen-Alex-P.3-FINAL.gif',
-              'images/Peng-Michelle-P.3-FINAL.gif',
-              'images/St.Cyr-Oliver-P.3-FINAL.gif',
-              'images/Weinberg-Veronica-P.3-FINAL.gif',
-              'images/White-Nala-P.3-FINAL.gif',
-              'images/Williamson-Sophia-P.3-FINAL.gif'
-            ];
-
-            paradeGifs.sort(function() { return Math.random() - 0.5; });
-
+            var MAX_WALKERS = 14;
+            var FPS = { 8: 8, 4: 6 };
             var strip = document.getElementById('parade-strip');
-            var screenW = window.innerWidth;
-            var endX = screenW + 140; // destination: just off-screen right
 
-            function launch(img, speed) {
-              var dist = endX + 120; // total pixels to travel from -120px to endX
-              img.style.transition = 'none';
-              img.style.left = '-120px'; // start off-screen left
-              // Double rAF ensures the browser paints the reset position before the transition begins
-              requestAnimationFrame(function() {
+            fetch('images/characters/characters.json')
+              .then(function(r) { return r.json(); })
+              .then(startParade)
+              .catch(function() { /* no manifest — the hero just shows without a parade */ });
+
+            function startParade(list) {
+              // Shuffle once, then hand characters out in that order so nobody repeats until all have walked
+              for (var i = list.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var t = list[i]; list[i] = list[j]; list[j] = t;
+              }
+              var nextIdx = 0;
+              function nextCharacter() { var c = list[nextIdx % list.length]; nextIdx++; return c; }
+
+              function dress(walker) {
+                var c = nextCharacter();
+                walker.style.setProperty('--frames', c.frames);
+                walker.style.setProperty('--fps', FPS[c.frames] || 8);
+                walker.firstChild.src = 'images/characters/' + c.file;
+              }
+
+              function launch(walker, speed) {
+                var size = walker.offsetWidth;
+                var endX = window.innerWidth + 20;   // just off-screen right
+                var dist = endX + size;              // from -size (off-screen left) to endX
+                walker.style.transition = 'none';
+                walker.style.left = -size + 'px';
+                // Double rAF ensures the browser paints the reset position before the transition begins
                 requestAnimationFrame(function() {
-                  img.style.transition = 'left ' + (dist / speed).toFixed(1) + 's linear';
-                  img.style.left = endX + 'px';
+                  requestAnimationFrame(function() {
+                    walker.style.transition = 'left ' + (dist / speed).toFixed(1) + 's linear';
+                    walker.style.left = endX + 'px';
+                  });
                 });
-              });
+              }
+
+              for (var k = 0; k < Math.min(MAX_WALKERS, list.length); k++) {
+                (function(k) {
+                  var walker = document.createElement('div');
+                  walker.className = 'parade-walker';
+                  var img = document.createElement('img');
+                  img.alt = '';
+                  walker.appendChild(img);
+                  strip.appendChild(walker);
+                  dress(walker);
+
+                  // Each walker gets a slightly different speed (100–140px/s) so they drift apart over time
+                  var speed = 100 + Math.random() * 40;
+                  walker.addEventListener('transitionend', function() { dress(walker); launch(walker, speed); });
+                  // Stagger entries 1.2s apart so the screen fills naturally rather than flooding all at once
+                  setTimeout(function() { launch(walker, speed); }, k * 1200);
+                })(k);
+              }
             }
-
-            paradeGifs.forEach(function(src, i) {
-              var img = document.createElement('img');
-              img.src = src;
-              img.alt = '';
-              img.setAttribute('role', 'presentation');
-              img.style.cssText = 'position:absolute;bottom:0;height:90px;width:auto;left:-120px;';
-              strip.appendChild(img);
-
-              // Each character gets a slightly different speed (100–140px/s) so they drift apart over time
-              var speed = 100 + Math.random() * 40;
-
-              // Stagger entries: 1.2 s apart so the screen fills naturally rather than flooding all at once
-              setTimeout(function() {
-                launch(img, speed);
-                img.addEventListener('transitionend', function() { launch(img, speed); });
-              }, i * 1200);
-            });
           })();
         </script>
 

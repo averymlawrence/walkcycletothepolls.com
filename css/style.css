@@ -415,12 +415,16 @@ p:last-child { margin-bottom: 0; }
   position: relative;
   overflow: hidden;
   text-align: center;
-  padding: 48px 24px 120px;
+  /* bottom padding clears the parade; the top ~20% of each walker frame is headroom, so it can tuck under the buttons */
+  padding: 24px 24px calc(var(--walker) * 0.8 + var(--ground) - 8px);
+  /* Parade walker frame size; the "ground" the parade walks on sits 28px above the hero's bottom edge */
+  --walker: clamp(110px, 11vw, 150px);
+  --ground: 28px;
 }
 
 .hero__logo {
   width: min(360px, 80vw);
-  margin: 0 auto 32px;
+  margin: 0 auto 24px;
   position: relative;
   z-index: 2;
 }
@@ -465,16 +469,53 @@ p:last-child { margin-bottom: 0; }
   pointer-events: none;
 }
 
-/* Walking character strip */
+/* Walking character strip. Sprite frames put the feet 115/800 (14.4%) up from the frame's
+   bottom, so the strip is lowered by that much to stand everyone on the same ground line. */
 .hero__character-strip {
   position: absolute;
-  bottom: 40px;
+  bottom: calc(var(--ground) - var(--walker) * 0.144);
   left: 0;
   right: 0;
-  height: 100px;
+  height: var(--walker);
   overflow: hidden;
-  z-index: 2;
+  z-index: 1;  /* behind the buttons (2); still in front of the sign, which comes earlier in the page */
   pointer-events: none;
+}
+.parade-walker {
+  position: absolute;
+  bottom: 0;
+  left: -200px;
+  width: var(--walker);
+  height: var(--walker);
+  overflow: hidden;
+}
+.parade-walker img {
+  width: calc(var(--frames) * 100%);
+  max-width: none;
+  height: auto;
+  animation: char-walk calc(var(--frames) / var(--fps) * 1s) steps(var(--frames)) infinite;
+}
+
+/* Home hero: Jacob's coral "Play the Game" button gets the same black outline as the yellow buttons */
+.hero .btn--purple { border-color: var(--black); }
+.hero .btn--purple:hover { border-color: var(--black); }
+
+/* "To the Polls" sign — post planted on the parade's ground line, tilted 3° to the left,
+   behind the walkers (same z-index, but earlier in the page). Pivots on the post's foot (43% across the image). */
+.hero__sign {
+  position: absolute;
+  bottom: var(--ground);
+  right: 6%;
+  height: clamp(170px, 22vw, 300px);
+  width: auto;
+  transform: rotate(-3deg);
+  transform-origin: 43% 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+/* Phones: the buttons stack down the middle, so shrink the sign into the bottom-right corner beside them */
+@media (max-width: 600px) {
+  .hero__sign { height: 104px; right: 4px; }
 }
 
 
