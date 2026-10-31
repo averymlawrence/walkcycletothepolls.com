@@ -1,0 +1,5 @@
+# Raw game submissions (contain submitters' email addresses) — never publish.
+# The site uses the WebPs that scripts/build_characters.py makes in images/characters/.
+images/WCTTP_Characters_*/
+# Old hand-made Characters sprites, replaced by images/characters/ (kept locally only)
+images/characters-page-webp-files/
