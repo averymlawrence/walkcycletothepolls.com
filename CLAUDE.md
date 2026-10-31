@@ -15,7 +15,7 @@
 - **Sept 15, 2026:** National Voter Registration Day — workshop at Ann Arbor District Library
 - **Oct 28, 2026:** James Baxter master class for Stamps students
 - **Oct 29, 2026:** James Baxter Penny Stamps Distinguished Speaker Lecture + live tournament at Michigan Theatre
-- **Late Oct–Nov 2026:** Full game installations at UMMA and North Campus early voting sites
+- **Oct 28, 2026:** Early voting tournament in the Duderstadt Center Atrium (the planned UMMA installation fell through — don't mention UMMA as a project venue)
 
 ## Website file structure
 ```
