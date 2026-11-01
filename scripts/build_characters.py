@@ -35,6 +35,8 @@ FPS = {8: 8, 4: 6}            # 4-frame walk cycles play a little slower
 UNTITLED_2024 = 'untitled 2024'  # shown on the card as "2024 edition"
 # Display-name fixes for names that can't be typed the same way in a folder name
 ARTIST_NAMES = {'Now What!': 'Now What?!', 'Lisa Kamaiopoili': 'Lisa Kamaiopili'}
+# Submission folders to leave off the page (e.g. art that wasn't the submitter's own)
+EXCLUDE = {'Akari Fu - Untitled 2024'}
 
 
 def slug(text):
@@ -47,6 +49,9 @@ def collect(src):
     for name in sorted(os.listdir(src), key=str.lower):
         folder = os.path.join(src, name)
         if not os.path.isdir(folder) or ' - ' not in name:
+            continue
+        if name in EXCLUDE:
+            print(f'  excluded: {name}')
             continue
         sheets = sorted(f for f in os.listdir(folder) if f.endswith('_spritesheet.png'))
         if not sheets:
