@@ -2,13 +2,15 @@
 """Render a 4K transparent "character parade" video of every submitted character.
 
 Usage (from the site root):
-    python3 scripts/render_parade_video.py "images/WCTTP_Characters_<date>" OUT_DIR [--test]
+    python3 scripts/render_parade_video.py "images/WCTTP_Characters_<date>" OUT_DIR [--once] [--test]
 
 Writes two ProRes 4444 (.mov, with alpha) clips to OUT_DIR:
   WCTTP-parade-loop.mov  starts mid-parade and loops seamlessly
   WCTTP-parade-fill.mov  starts empty and fills up; its last frame hands off
                          to the first frame of the loop clip
 plus a small MP4 preview of each on a sky-blue background.
+--once shows every character exactly once (files named WCTTP-parade-once-*);
+without it the lanes are packed tighter and characters repeat 2-3 times.
 --test renders a few still PNGs instead of the videos.
 
 Characters walk left to right in lanes that fill the frame. Higher lanes are
@@ -35,7 +37,7 @@ W, H = 3840, 2160
 VIDEO_FPS = 24
 SECONDS = 18                # walk cycles (8 and 6 fps) and every lane all repeat in 18s
 N_FRAMES = VIDEO_FPS * SECONDS
-SRC = 800                   # sprite sheet frame size
+SRC = 800                   # standard sprite sheet frame size (some sheets differ)
 LANES = 12
 TOP_FEET, TOP_SIZE = 250, 230     # furthest lane: feet y and frame size on screen
 BOTTOM_FEET, BOTTOM_SIZE = 2090, 800
@@ -70,6 +72,9 @@ def lanes():
 
 def load(c):
     sheet = Image.open(c['sheet']).convert('RGBA')
+    size = sheet.height
+    if size != SRC:   # e.g. 1200px or 168px frames: rescale so the character sits on the standard frame
+        sheet = sheet.resize((c['frames'] * SRC, SRC), Image.LANCZOS)
     frames = [sheet.crop((i * SRC, 0, (i + 1) * SRC, SRC)) for i in range(c['frames'])]
     union = None
     legs, centers = 0, []
@@ -123,10 +128,16 @@ def prepare(c, lane):
                 sdx=c['shadow_cx'] * sc - sh.width / 2, sdy=-sh.height / 2)
 
 
-def plan(chars):
+def plan(chars, once):
     rng = random.Random(SEED)
     ls = lanes()
     slots_per_lane = [int(l['length'] / (SPACING * l['size'])) for l in ls]
+    if once:   # share the characters out between lanes in the same proportions
+        total = sum(slots_per_lane)
+        exact = [n * len(chars) / total for n in slots_per_lane]
+        slots_per_lane = [int(x) for x in exact]
+        for i in sorted(range(LANES), key=lambda i: exact[i] - slots_per_lane[i])[sum(slots_per_lane) - len(chars):]:
+            slots_per_lane[i] += 1
     # Deal characters into slots: every character at least once, no repeats within a lane
     pool = []
     while len(pool) < sum(slots_per_lane):
@@ -203,14 +214,15 @@ def encode(out_dir, name, fill, procs):
 
 
 def main():
-    args = [a for a in sys.argv[1:] if a != '--test']
+    args = [a for a in sys.argv[1:] if a not in ('--test', '--once')]
     if len(args) != 2:
         sys.exit(__doc__)
     src, out_dir = args
     os.makedirs(out_dir, exist_ok=True)
+    once = '--once' in sys.argv
     chars = [load(c) for c in collect(src)]
     print(f'{len(chars)} characters')
-    for s in plan(chars):
+    for s in plan(chars, once):
         s['prep'] = prepare(s['char'], s['lane'])
         SLOTS.append(s)
     print(f'{len(SLOTS)} walkers in {LANES} lanes')
@@ -220,11 +232,12 @@ def main():
             bg = Image.new('RGBA', (W, H), (159, 214, 230, 255))
             bg.alpha_composite(img)
             bg.convert('RGB').resize((1920, 1080)).save(
-                os.path.join(out_dir, f'test-{"fill" if fill else "loop"}-{f}.png'))
+                os.path.join(out_dir, f'test-{"once-" if once else ""}{"fill" if fill else "loop"}-{f}.png'))
         return
     procs = max(1, os.cpu_count() - 2)
-    encode(out_dir, 'WCTTP-parade-loop', False, procs)
-    encode(out_dir, 'WCTTP-parade-fill', True, procs)
+    name = 'WCTTP-parade-once' if once else 'WCTTP-parade'
+    encode(out_dir, f'{name}-loop', False, procs)
+    encode(out_dir, f'{name}-fill', True, procs)
 
 
 if __name__ == '__main__':
