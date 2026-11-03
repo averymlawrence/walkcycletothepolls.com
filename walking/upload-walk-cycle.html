@@ -199,6 +199,8 @@
   </div>
 
   <script src="../js/nav.js"></script>
+  <!-- Privacy-friendly visit counts (no cookies): https://walkcycletothepolls.goatcounter.com -->
+  <script data-goatcounter="https://walkcycletothepolls.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 <script>
 const apiEndpoint = "https://dfiv0rwmt3.execute-api.us-east-1.amazonaws.com/Default/characters";
@@ -261,8 +263,11 @@ form.addEventListener("submit", (e) => {
     })
     .then((response) => {
       let status = document.getElementById("submit_status")
-      if (response.ok)
+      if (response.ok) {
         status.innerHTML = "Success!"
+        if (window.goatcounter && window.goatcounter.count)   // visit count only, no form data
+          window.goatcounter.count({ path: 'walk-cycle-submitted', title: 'Walk cycle submitted', event: true })
+      }
       else
         status.innerHTML = "Failed..."
       form.reset();

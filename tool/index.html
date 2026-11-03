@@ -560,6 +560,9 @@ body {
 </div>
 
 <script>
+// Visit counts for exports (GoatCounter; event name only)
+function countEvent(path,title){try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path,title,event:true});}catch(e){}}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 const CANVAS_W = 800;
 const CANVAS_H = 800;
@@ -2008,6 +2011,7 @@ document.getElementById('btnExportPng').addEventListener('click', ()=>{
   const a=document.createElement('a');
   a.href=sheet.toDataURL('image/png');
   a.download=`walk_cycle_${appMode}_spritesheet.png`; a.click();
+  countEvent('tool-export-png','Animation tool: PNG export');
   setStatus('PNG exported!');
 });
 
@@ -2101,6 +2105,7 @@ document.getElementById('btnExportGif').addEventListener('click', ()=>{
   const blob=new Blob([new Uint8Array(bytes)],{type:'image/gif'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a'); a.href=url; a.download=`walk_cycle_${appMode}.gif`; a.click();
+  countEvent('tool-export-gif','Animation tool: GIF export');
   setTimeout(()=>URL.revokeObjectURL(url),1000);
   setStatus('GIF exported!');
 });
@@ -2174,6 +2179,7 @@ function saveProjectFile() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = `walk_cycle_${appMode}_project.json`; a.click();
+  countEvent('tool-save-project','Animation tool: project saved');
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   setStatus('Project saved!');
   closePalettePanel();
@@ -2299,5 +2305,7 @@ resizeObs.observe(document.getElementById('canvasArea'));
 
 window.addEventListener('load', ()=>{ if (appMode) { resizeCanvasArea(); updateThumbs(); } });
 </script>
+  <!-- Privacy-friendly visit counts (no cookies): https://walkcycletothepolls.goatcounter.com -->
+  <script data-goatcounter="https://walkcycletothepolls.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
